@@ -37,13 +37,13 @@ function update(){
     enemies.update(track.speed);
 
     const playerBox={
-    x:player.x-6,
-    y:player.y-14,
-    w:12,
-    h:28
+    x:player.x-7,
+    y:player.y-18,
+    w:14,
+    h:36
 };
 
-    for(let e of enemies.list){
+   for(let e of enemies.list){
         if(collision(playerBox,e)){
             gameOver=true;
         }
