@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- evita cache no celular -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -26,7 +25,7 @@ body{
 canvas{
     background:#0a0a0a;
     image-rendering:pixelated;
-    touch-action:none; /* impede scroll no celular */
+    touch-action:none;
 }
 </style>
 </head>
@@ -35,8 +34,6 @@ canvas{
 
 <canvas id="game" width="480" height="640"></canvas>
 
-<!-- versão com anti-cache -->
-<script type="module" src="./src/main.js?v=3"></script>
-
+<script type="module" src="./src/main.js?v=10"></script>
 </body>
 </html>
