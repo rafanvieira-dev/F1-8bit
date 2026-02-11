@@ -3,7 +3,7 @@ export const input={
     right:false
 };
 
-// teclado
+// teclado (continua funcionando no PC)
 window.addEventListener("keydown",e=>{
     if(e.key==="ArrowLeft") input.left=true;
     if(e.key==="ArrowRight") input.right=true;
@@ -14,22 +14,23 @@ window.addEventListener("keyup",e=>{
     if(e.key==="ArrowRight") input.right=false;
 });
 
-// mobile touch
-function bind(btn,dir){
-    if(!btn) return;
+// 📱 CONTROLE POR TOQUE NA TELA
+function handleTouch(x){
+    const middle = window.innerWidth/2;
 
-    const start=()=>input[dir]=true;
-    const end=()=>input[dir]=false;
-
-    btn.addEventListener("touchstart",start,{passive:false});
-    btn.addEventListener("touchend",end);
-    btn.addEventListener("touchcancel",end);
-
-    // funciona também como clique
-    btn.addEventListener("mousedown",start);
-    btn.addEventListener("mouseup",end);
-    btn.addEventListener("mouseleave",end);
+    input.left = x < middle;
+    input.right = x >= middle;
 }
 
-bind(document.getElementById("leftBtn"),"left");
-bind(document.getElementById("rightBtn"),"right");
+window.addEventListener("touchstart",e=>{
+    handleTouch(e.touches[0].clientX);
+},{passive:false});
+
+window.addEventListener("touchmove",e=>{
+    handleTouch(e.touches[0].clientX);
+},{passive:false});
+
+window.addEventListener("touchend",()=>{
+    input.left=false;
+    input.right=false;
+});
