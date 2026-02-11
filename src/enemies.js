@@ -3,6 +3,8 @@ export class Enemies{
         this.list=[];
         this.spawnTimer=0;
         this.speed=3;
+        this.lastLane = 240;
+
     }
 
     update(trackSpeed){
@@ -16,7 +18,13 @@ export class Enemies{
    this.spawnTimer=0;
 
             const lanes=[160,240,320];
-            const lane=lanes[Math.floor(Math.random()*lanes.length)];
+            let lane;
+do{
+    lane=lanes[Math.floor(Math.random()*lanes.length)];
+}while(Math.abs(lane - this.lastLane) < 60);
+
+this.lastLane = lane;
+
 
             this.list.push({
                 x:lane,
