@@ -12,8 +12,8 @@ export class Enemies{
         this.speed = trackSpeed;
 
         // cria inimigos
-        if(this.spawnTimer>60){
-            this.spawnTimer=0;
+        if(this.spawnTimer > 80 - Math.min(trackSpeed*5,50)){
+   this.spawnTimer=0;
 
             const lanes=[160,240,320];
             const lane=lanes[Math.floor(Math.random()*lanes.length)];
