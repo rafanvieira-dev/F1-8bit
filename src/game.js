@@ -46,11 +46,12 @@ function render(){
 
     ctx.clearRect(0,0,480,640);
 
-    drawTrack(ctx,track);
-    drawCar(ctx,player);
-    drawCockpit(ctx,score);
+    drawTrack(ctx,track);     // fundo
+    drawCar(ctx,player);      // jogador
+    drawCockpit(ctx,score);   // HUD por cima
+}
 
-    const rec=JSON.parse(localStorage.getItem("f1record"));
+const rec=JSON.parse(localStorage.getItem("f1record"));
     if(rec){
         ctx.fillStyle="white";
         ctx.font="12px monospace";
