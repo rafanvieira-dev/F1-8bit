@@ -10,13 +10,31 @@ export function drawTrack(ctx, track){
 
 export function drawCar(ctx, player){
     ctx.fillStyle="red";
-    ctx.fillRect(player.x-8,player.y-16,16,32);
+
+    // asa traseira
+    ctx.fillRect(player.x-10,player.y-16,20,4);
+
+    // corpo
+    ctx.fillRect(player.x-4,player.y-16,8,26);
+
+    // nariz
+    ctx.fillRect(player.x-2,player.y-26,4,10);
+
+    // rodas
+    ctx.fillRect(player.x-9,player.y-8,4,8);
+    ctx.fillRect(player.x+5,player.y-8,4,8);
 }
 
 export function drawEnemies(ctx,enemies){
     ctx.fillStyle="yellow";
+
     for(let e of enemies.list){
-        ctx.fillRect(e.x-8,e.y-16,e.w,e.h);
+
+        ctx.fillRect(e.x-10,e.y-16,20,4);
+        ctx.fillRect(e.x-4,e.y-16,8,26);
+        ctx.fillRect(e.x-2,e.y-26,4,10);
+        ctx.fillRect(e.x-9,e.y-8,4,8);
+        ctx.fillRect(e.x+5,e.y-8,4,8);
     }
 }
 
