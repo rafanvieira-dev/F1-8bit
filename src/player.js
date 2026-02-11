@@ -1,17 +1,25 @@
 export class Player{
     constructor(){
-        this.x = 240;
-        this.y = 520;
-        this.speed = 4;
+        this.lanes=[150,210,270,330];
+        this.currentLane=1;
+        this.targetX=this.lanes[this.currentLane];
+        this.y=520;
     }
 
     update(input){
-        if(input.left) this.x -= this.speed;
-        if(input.right) this.x += this.speed;
+        if(input.left){
+            this.currentLane=Math.max(0,this.currentLane-1);
+            input.left=false;
+        }
 
-        // limite da pista
-        if(this.x < 140) this.x = 140;
-        if(this.x > 340) this.x = 340;
+        if(input.right){
+            this.currentLane=Math.min(3,this.currentLane+1);
+            input.right=false;
+        }
+
+        this.targetX=this.lanes[this.currentLane];
+
+        // movimento suave
+        this.x += (this.targetX-this.x)*0.2 || (this.x=this.targetX);
     }
 }
-
