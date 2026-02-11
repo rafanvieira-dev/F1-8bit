@@ -1,67 +1,60 @@
 import {input} from "./input.js";
 import {Player} from "./player.js";
 import {Track} from "./track.js";
-import {Enemies} from "./enemies.js";
-import {drawTrack, drawCar, drawEnemies, drawCockpit} from "./renderer.js";
+import {drawTrack, drawCar, drawCockpit} from "./renderer.js";
 
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-const player=new Player();
-const track=new Track();
-const enemies=new Enemies();
+const player = new Player();
+const track = new Track();
 
-let score=0;
+let score = 0;
+let speed = 0;
+let startTime = Date.now();
 let gameOver=false;
-window.addEventListener("keydown", e=>{
-    if(e.code==="Space" && gameOver){
-        location.reload();
-    }
-});
-
-
-function collision(a,b){
-    return a.x < b.x+b.w &&
-           a.x+a.w > b.x &&
-           a.y < b.y+b.h &&
-           a.y+a.h > b.y;
-}
 
 function update(){
+
     if(gameOver) return;
 
-    score++;
-
     player.update(input);
-    track.update(score);
-    enemies.update(track.speed);
+    track.update();
 
-    const playerBox={
-    x:player.x-7,
-    y:player.y-18,
-    w:14,
-    h:36
-};
+    speed += 0.002;
+    score++;
+}
 
-   for(let e of enemies.list){
-        if(collision(playerBox,e)){
-            gameOver=true;
-        }
-    }
+function endGame(){
+
+    gameOver=true;
+
+    const time=((Date.now()-startTime)/1000).toFixed(1);
+
+    let name=prompt("NOVO RECORDE!\nDigite 3 letras:");
+    if(!name) name="???";
+    name=name.substring(0,3).toUpperCase();
+
+    localStorage.setItem("f1record",
+        JSON.stringify({name,time,speed:speed.toFixed(2)})
+    );
+
+    location.reload();
 }
 
 function render(){
+
     ctx.clearRect(0,0,480,640);
 
     drawTrack(ctx,track);
-    drawEnemies(ctx,enemies);
     drawCar(ctx,player);
-    drawCockpit(ctx,score,track.speed);
+    drawCockpit(ctx,score);
 
-    if(gameOver){
-        ctx.fillStyle="red";
-        ctx.font="40px monospace";
-        ctx.fillText("GAME OVER",120,300);
+    const rec=JSON.parse(localStorage.getItem("f1record"));
+    if(rec){
+        ctx.fillStyle="white";
+        ctx.font="12px monospace";
+        ctx.fillText(`REC ${rec.name} ${rec.time}s`,10,20);
     }
 }
 
