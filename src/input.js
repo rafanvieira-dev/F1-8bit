@@ -1,7 +1,6 @@
-export const input={
-    left:false,
-    right:false
-};
+export const input={left:false,right:false};
+
+const canvas=document.getElementById("game");
 
 // teclado
 document.addEventListener("keydown",e=>{
@@ -14,18 +13,17 @@ document.addEventListener("keyup",e=>{
     if(e.key==="ArrowRight") input.right=false;
 });
 
-// toque (lado da tela)
-document.addEventListener("touchstart",e=>{
-    const x=e.touches[0].clientX;
+// toque
+canvas.addEventListener("touchstart",touch,{passive:false});
+canvas.addEventListener("touchmove",touch,{passive:false});
+canvas.addEventListener("touchend",()=>{input.left=false;input.right=false;});
 
-    if(x < window.innerWidth/2){
-        input.left=true;
-    }else{
-        input.right=true;
-    }
-});
+function touch(e){
+    e.preventDefault();
+    const rect=canvas.getBoundingClientRect();
+    const x=e.touches[0].clientX-rect.left;
+    const mid=rect.width/2;
 
-document.addEventListener("touchend",()=>{
-    input.left=false;
-    input.right=false;
-});
+    input.left=x<mid;
+    input.right=x>=mid;
+}
