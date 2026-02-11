@@ -19,25 +19,13 @@ export function drawTrack(ctx,track){
     }
 }
 
-export function drawCar(ctx,p){
-    const x=p.x,y=p.y;
+function drawF1(ctx,x,y,color){
 
-    ctx.fillStyle="#00000055";
-    ctx.fillRect(x-14,y+22,28,6);
+    ctx.fillStyle=color;
+    ctx.fillRect(x-6,y-10,12,34);
 
     ctx.fillStyle="#111";
     ctx.fillRect(x-18,y-6,36,4);
-
-    ctx.fillStyle="#e10600";
-    ctx.fillRect(x-6,y-10,12,34);
-
-    ctx.fillStyle="#00d0ff";
-    ctx.fillRect(x-4,y,8,10);
-
-    ctx.fillStyle="#ff2a2a";
-    ctx.fillRect(x-3,y-18,6,10);
-
-    ctx.fillStyle="#111";
     ctx.fillRect(x-16,y-20,32,4);
 
     ctx.fillStyle="#000";
@@ -47,11 +35,21 @@ export function drawCar(ctx,p){
     ctx.fillRect(x+8,y-6,6,10);
 }
 
+export function drawCar(ctx,p){
+    drawF1(ctx,p.x,p.y,"#e10600");
+}
+
+export function drawEnemies(ctx,track){
+    for(const e of track.enemies){
+        drawF1(ctx,e.x,e.y,"#ffffff");
+    }
+}
+
 export function drawHUD(ctx,time,speed,record){
     ctx.fillStyle="white";
     ctx.font="12px monospace";
     ctx.fillText(`Tempo: ${time}s`,10,20);
-    ctx.fillText(`Velocidade: ${speed}`,10,40);
+    ctx.fillText(`Vel: ${speed}`,10,40);
 
     if(record)
         ctx.fillText(`REC ${record.name} ${record.time}s`,10,60);
