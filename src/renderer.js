@@ -8,22 +8,45 @@ export function drawTrack(ctx, track){
     }
 }
 
-export function drawCar(ctx, player){
-    ctx.fillStyle="red";
+export function drawCar(ctx,player){
+
+    const x=player.x;
+    const y=player.y;
+
+    // sombra
+    ctx.fillStyle="#00000055";
+    ctx.fillRect(x-14,y+22,28,6);
 
     // asa traseira
-    ctx.fillRect(player.x-10,player.y-16,20,4);
+    ctx.fillStyle="#111";
+    ctx.fillRect(x-18,y-6,36,4);
 
-    // corpo
-    ctx.fillRect(player.x-4,player.y-16,8,26);
+    // corpo principal
+    ctx.fillStyle="#e10600";
+    ctx.fillRect(x-6,y-10,12,34);
+
+    // cockpit
+    ctx.fillStyle="#00d0ff";
+    ctx.fillRect(x-4,y,8,10);
 
     // nariz
-    ctx.fillRect(player.x-2,player.y-26,4,10);
+    ctx.fillStyle="#ff2a2a";
+    ctx.fillRect(x-3,y-18,6,10);
 
-    // rodas
-    ctx.fillRect(player.x-9,player.y-8,4,8);
-    ctx.fillRect(player.x+5,player.y-8,4,8);
+    // asa dianteira
+    ctx.fillStyle="#111";
+    ctx.fillRect(x-16,y-20,32,4);
+
+    // rodas traseiras
+    ctx.fillStyle="#000";
+    ctx.fillRect(x-14,y+10,6,10);
+    ctx.fillRect(x+8,y+10,6,10);
+
+    // rodas dianteiras
+    ctx.fillRect(x-14,y-6,6,10);
+    ctx.fillRect(x+8,y-6,6,10);
 }
+
 
 export function drawEnemies(ctx,enemies){
     ctx.fillStyle="yellow";
