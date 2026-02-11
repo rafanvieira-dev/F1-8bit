@@ -38,3 +38,7 @@ canvas{
         display:none;
     }
 }
+body{
+    touch-action: none;
+    overscroll-behavior: contain;
+}
