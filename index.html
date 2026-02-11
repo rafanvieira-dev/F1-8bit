@@ -1,20 +1,112 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>F1 8bit</title>
-<link rel="stylesheet" href="style.css">
+<style>
+body{margin:0;background:#0b0b0b;color:#fff;font-family:monospace;text-align:center}
+canvas{background:#222;display:block;margin:0 auto}
+#hud{position:fixed;top:8px;left:0;right:0;text-align:center}
+button{font-size:22px;padding:10px 18px;margin:6px}
+#mobile{position:fixed;bottom:15px;width:100%;display:flex;justify-content:center;gap:30px}
+</style>
 </head>
-
 <body>
+<div id="hud">Velocidade: <span id="spd">0</span> | Tempo: <span id="time">0</span></div>
+<canvas id="game" width="420" height="720"></canvas>
+<div id="mobile">
+<button onclick="move(-1)">◀</button>
+<button onclick="move(1)">▶</button>
+</div>
+<script>
+const c=document.getElementById('game');
+const ctx=c.getContext('2d');
+const lanes=4;
+const laneW=c.width/lanes;
+let playerLane=1;
+let speed=3;
+let time=0;
+let obstacles=[];
+let lastSpawn=0;
+let playing=true;
 
-<canvas id="game" width="480" height="640"></canvas>
+function drawCar(x,y,color){
+ ctx.fillStyle=color;
+ ctx.fillRect(x+10,y+10,30,60);
+ ctx.fillRect(x+5,y+20,40,30);
+ ctx.fillRect(x,y+30,50,10);
+ ctx.fillStyle='black';
+ ctx.fillRect(x+5,y+15,10,10);
+ ctx.fillRect(x+35,y+15,10,10);
+ ctx.fillRect(x+5,y+55,10,10);
+ ctx.fillRect(x+35,y+55,10,10);
+ ctx.fillStyle='white';
+ ctx.fillRect(x,y+28,50,4);
+ ctx.fillRect(x+10,y+70,30,4);
+}
 
-<script type="module" src="./src/game.js"></script>
+function spawn(){
+ let free=Math.floor(Math.random()*lanes);
+ for(let i=0;i<lanes;i++){
+  if(i!==free)obstacles.push({lane:i,y:-80});
+ }
+}
 
-<!-- IMPORTANTE: precisa ser module -->
-<script type="module" src="./src/game.js"></script>
+function move(d){
+ playerLane=Math.max(0,Math.min(lanes-1,playerLane+d));
+}
 
+document.addEventListener('keydown',e=>{
+ if(e.key==='ArrowLeft')move(-1);
+ if(e.key==='ArrowRight')move(1);
+});
+
+function saveScore(){
+ let ini=prompt('3 letras:','AAA');
+ if(!ini)return;
+ ini=ini.toUpperCase().slice(0,3);
+ const rec={ini,vel:Math.floor(speed),tempo:Math.floor(time)};
+ localStorage.setItem('f1record',JSON.stringify(rec));
+ alert(`Salvo: ${ini} | V${rec.vel} | ${rec.tempo}s`);
+}
+
+function update(dt){
+ if(!playing)return;
+ time+=dt/1000;
+ speed+=0.0008*dt;
+ document.getElementById('spd').textContent=speed.toFixed(1);
+ document.getElementById('time').textContent=Math.floor(time);
+
+ if(performance.now()-lastSpawn>1600){spawn();lastSpawn=performance.now();}
+ 
+ obstacles.forEach(o=>o.y+=speed);
+ obstacles=obstacles.filter(o=>o.y<c.height+80);
+ 
+ obstacles.forEach(o=>{
+  if(o.lane===playerLane && o.y>580 && o.y<660){
+   playing=false;saveScore();
+  }
+ });
+}
+
+function draw(){
+ ctx.fillStyle='#333';ctx.fillRect(0,0,c.width,c.height);
+ ctx.strokeStyle='#888';ctx.lineWidth=3;
+ for(let i=1;i<lanes;i++){ctx.setLineDash([20,20]);ctx.beginPath();ctx.moveTo(i*laneW,0);ctx.lineTo(i*laneW,c.height);ctx.stroke();}
+
+ obstacles.forEach(o=>drawCar(o.lane*laneW+15,o.y,'red'));
+ drawCar(playerLane*laneW+15,600,'cyan');
+}
+
+let last=performance.now();
+function loop(now){
+ const dt=now-last;last=now;
+ update(dt);
+ draw();
+ requestAnimationFrame(loop);
+}
+loop(last);
+</script>
 </body>
 </html>
