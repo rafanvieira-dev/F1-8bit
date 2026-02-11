@@ -19,15 +19,33 @@ export function drawTrack(ctx,track){
     }
 }
 
-function drawF1(ctx,x,y,color){
+/* ===== CARRO F1 DETALHADO ===== */
+function drawF1(ctx,x,y,main,second,visor){
 
-    ctx.fillStyle=color;
+    // sombra
+    ctx.fillStyle="#00000055";
+    ctx.fillRect(x-14,y+22,28,6);
+
+    // asa traseira
+    ctx.fillStyle=second;
+    ctx.fillRect(x-18,y-6,36,4);
+
+    // corpo
+    ctx.fillStyle=main;
     ctx.fillRect(x-6,y-10,12,34);
 
-    ctx.fillStyle="#111";
-    ctx.fillRect(x-18,y-6,36,4);
+    // cockpit
+    ctx.fillStyle=visor;
+    ctx.fillRect(x-4,y,8,10);
+
+    // nariz
+    ctx.fillRect(x-3,y-18,6,10);
+
+    // asa dianteira
+    ctx.fillStyle=second;
     ctx.fillRect(x-16,y-20,32,4);
 
+    // rodas
     ctx.fillStyle="#000";
     ctx.fillRect(x-14,y+10,6,10);
     ctx.fillRect(x+8,y+10,6,10);
@@ -35,13 +53,29 @@ function drawF1(ctx,x,y,color){
     ctx.fillRect(x+8,y-6,6,10);
 }
 
+/* ===== PLAYER — McLaren Senna ===== */
 export function drawCar(ctx,p){
-    drawF1(ctx,p.x,p.y,"#e10600");
+    drawF1(
+        ctx,
+        p.x,
+        p.y,
+        "#ffffff",   // corpo branco
+        "#e10600",   // asas vermelhas
+        "#00d0ff"    // visor azul
+    );
 }
 
+/* ===== INIMIGOS — azul e amarelo ===== */
 export function drawEnemies(ctx,track){
     for(const e of track.enemies){
-        drawF1(ctx,e.x,e.y,"#ffffff");
+        drawF1(
+            ctx,
+            e.x,
+            e.y,
+            "#0033cc", // azul
+            "#ffd400", // amarelo
+            "#00d0ff"
+        );
     }
 }
 
