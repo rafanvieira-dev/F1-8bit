@@ -14,22 +14,22 @@ window.addEventListener("keyup",e=>{
     if(e.key==="ArrowRight") input.right=false;
 });
 
-// mobile
-const leftBtn=document.getElementById("leftBtn");
-const rightBtn=document.getElementById("rightBtn");
+// mobile touch
+function bind(btn,dir){
+    if(!btn) return;
 
-function press(btn,dir){
-    btn.addEventListener("touchstart",e=>{
-        e.preventDefault();
-        input[dir]=true;
-    });
+    const start=()=>input[dir]=true;
+    const end=()=>input[dir]=false;
 
-    btn.addEventListener("touchend",()=>{
-        input[dir]=false;
-    });
+    btn.addEventListener("touchstart",start,{passive:false});
+    btn.addEventListener("touchend",end);
+    btn.addEventListener("touchcancel",end);
+
+    // funciona também como clique
+    btn.addEventListener("mousedown",start);
+    btn.addEventListener("mouseup",end);
+    btn.addEventListener("mouseleave",end);
 }
 
-if(leftBtn && rightBtn){
-    press(leftBtn,"left");
-    press(rightBtn,"right");
-}
+bind(document.getElementById("leftBtn"),"left");
+bind(document.getElementById("rightBtn"),"right");
