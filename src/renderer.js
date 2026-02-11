@@ -28,4 +28,9 @@ export function drawCockpit(ctx,score,speed){
     ctx.font="16px monospace";
     ctx.fillText("TIME: "+score,300,590);
     ctx.fillText("KMH: "+Math.floor(speed*40),300,610);
+    // áreas de controle visual
+ctx.fillStyle="rgba(255,255,255,0.05)";
+ctx.fillRect(0,0,240,640);
+ctx.fillRect(240,0,240,640);
+
 }
