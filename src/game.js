@@ -13,6 +13,12 @@ const enemies=new Enemies();
 
 let score=0;
 let gameOver=false;
+window.addEventListener("keydown", e=>{
+    if(e.code==="Space" && gameOver){
+        location.reload();
+    }
+});
+
 
 function collision(a,b){
     return a.x < b.x+b.w &&
