@@ -30,7 +30,12 @@ function update(){
     track.update(score);
     enemies.update(track.speed);
 
-    const playerBox={x:player.x-8,y:player.y-16,w:16,h:32};
+    const playerBox={
+    x:player.x-6,
+    y:player.y-14,
+    w:12,
+    h:28
+};
 
     for(let e of enemies.list){
         if(collision(playerBox,e)){
