@@ -1,29 +1,57 @@
-export const input={left:false,right:false};
+export const input = {
+    left:false,
+    right:false
+};
 
-const canvas=document.getElementById("game");
+let pressed = {
+    left:false,
+    right:false
+};
 
-// teclado
+const canvas = document.getElementById("game");
+
+/* ===== TECLADO ===== */
+
 document.addEventListener("keydown",e=>{
-    if(e.key==="ArrowLeft") input.left=true;
-    if(e.key==="ArrowRight") input.right=true;
+
+    if(e.key==="ArrowLeft" && !pressed.left){
+        input.left = true;
+        pressed.left = true;
+    }
+
+    if(e.key==="ArrowRight" && !pressed.right){
+        input.right = true;
+        pressed.right = true;
+    }
 });
 
 document.addEventListener("keyup",e=>{
-    if(e.key==="ArrowLeft") input.left=false;
-    if(e.key==="ArrowRight") input.right=false;
+
+    if(e.key==="ArrowLeft") pressed.left=false;
+    if(e.key==="ArrowRight") pressed.right=false;
 });
 
-// toque
-canvas.addEventListener("touchstart",touch,{passive:false});
-canvas.addEventListener("touchmove",touch,{passive:false});
-canvas.addEventListener("touchend",()=>{input.left=false;input.right=false;});
 
-function touch(e){
+/* ===== TOQUE (1 toque = 1 ação) ===== */
+
+canvas.addEventListener("touchstart",e=>{
     e.preventDefault();
-    const rect=canvas.getBoundingClientRect();
-    const x=e.touches[0].clientX-rect.left;
-    const mid=rect.width/2;
 
-    input.left=x<mid;
-    input.right=x>=mid;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.touches[0].clientX - rect.left;
+    const mid = rect.width/2;
+
+    if(x < mid){
+        input.left = true;
+    }else{
+        input.right = true;
+    }
+
+},{passive:false});
+
+
+/* ===== LIMPA O INPUT A CADA FRAME ===== */
+export function resetInput(){
+    input.left=false;
+    input.right=false;
 }
