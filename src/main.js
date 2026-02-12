@@ -13,38 +13,31 @@ let start=Date.now();
 let gameOver=false;
 let paused=false;
 
-/* ========= MUSICA ========= */
+/* ================= MUSICA ARCADE ================= */
 const music=new Audio("../music/music.mp3");
 music.loop=true;
 music.volume=0.4;
 
-function startMusic(){
+let musicStarted=false;
+
+function tryStartMusic(){
+    if(musicStarted) return;
+    musicStarted=true;
     music.play().catch(()=>{});
 }
 
-document.addEventListener("keydown",startMusic,{once:true});
-document.addEventListener("touchstart",startMusic,{once:true});
-
-/* ========= PAUSA ========= */
+/* pausa no P */
 document.addEventListener("keydown",(e)=>{
     if(e.key==="p") paused=!paused;
 });
 
-/* ========= COLISAO ========= */
-function checkCollision(){
-    for(const e of track.enemies){
-        if(Math.abs(e.x-player.x)<20 &&
-           Math.abs(e.y-player.y)<25){
-            return true;
-        }
-    }
-    return false;
-}
-
+/* ================= FIM DE JOGO ================= */
 function endGame(){
+
     gameOver=true;
 
     const time=((Date.now()-start)/1000).toFixed(1);
+    const kmh=track.kmh;
 
     let name=prompt("BATEU! 3 letras:");
     if(!name) name="???";
@@ -52,28 +45,38 @@ function endGame(){
 
     const old=JSON.parse(localStorage.getItem("f1record"));
 
-    if(!old || track.speed>old.speed){
+    if(!old || kmh>old.kmh){
         localStorage.setItem("f1record",JSON.stringify({
             name,
             time,
-            speed:Number(track.speed.toFixed(1))
+            kmh
         }));
     }
 
     location.reload();
 }
 
+/* ================= UPDATE ================= */
 function update(){
+
     if(gameOver||paused) return;
 
     player.update(input);
+
+    /* qualquer controle inicia a musica */
+    if(input.left || input.right || input.touch)
+        tryStartMusic();
+
     track.update(player);
 
-    if(checkCollision()) endGame();
+    if(player.crashed)
+        endGame();
 }
 
+/* ================= RENDER ================= */
 function render(){
-    ctx.clearRect(0,0,480,640);
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
     drawTrack(ctx,track);
     drawEnemies(ctx,track);
@@ -82,15 +85,16 @@ function render(){
     const time=((Date.now()-start)/1000).toFixed(1);
     const rec=JSON.parse(localStorage.getItem("f1record"));
 
-    drawHUD(ctx,time,track.speed.toFixed(1),rec);
+    drawHUD(ctx,time,track.kmh,rec);
 
     if(paused){
         ctx.fillStyle="white";
         ctx.font="20px monospace";
-        ctx.fillText("PAUSADO",190,320);
+        ctx.fillText("PAUSADO",canvas.width/2-45,canvas.height/2);
     }
 }
 
+/* ================= LOOP ================= */
 function loop(){
     update();
     render();
