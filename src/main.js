@@ -115,10 +115,11 @@ function render(){
 }
 
 /* ================= LOOP ================= */
+import {resetInput} from "./input.js";
+
 function loop(){
     update();
     render();
+    resetInput();   // <-- ESSENCIAL
     requestAnimationFrame(loop);
 }
-
-loop();
