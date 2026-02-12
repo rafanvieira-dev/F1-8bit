@@ -27,7 +27,7 @@ window.addEventListener("resize",resize);
 resize();
 
 /* música */
-const music=new Audio("music.mp3");
+const music=new Audio("../music/music.mp3");
 music.loop=true;
 music.volume=0.4;
 music.play().catch(()=>{});
