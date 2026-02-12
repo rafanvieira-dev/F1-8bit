@@ -1,28 +1,26 @@
 body{
     background:#111;
-    margin:0;
     display:flex;
     align-items:center;
     justify-content:center;
     height:100vh;
-    overflow:hidden;
+    margin:0;
     touch-action:none;
     overscroll-behavior:contain;
     font-family:Arial, Helvetica, sans-serif;
 }
 
-/* tela do jogo estilo console */
+/* canvas agora responsivo */
 canvas{
+    width:100vw;
+    height:100vh;
+    display:block;
     image-rendering:pixelated;
     border:4px solid white;
-
-    width:auto;
-    height:auto;
-    max-width:100vw;
-    max-height:100vh;
+    box-sizing:border-box;
 }
 
-/* pausa */
+/* botão pausa */
 #pauseBtn{
     position:fixed;
     top:20px;
@@ -49,9 +47,9 @@ canvas{
 }
 
 #mobileControls button{
-    width:110px;
-    height:110px;
-    font-size:36px;
+    width:120px;
+    height:120px;
+    font-size:40px;
     border:none;
     border-radius:20px;
     background:#ffffff22;
@@ -59,6 +57,7 @@ canvas{
     backdrop-filter:blur(5px);
 }
 
+/* esconder controles no pc */
 @media (hover:hover){
     #mobileControls{
         display:none;
