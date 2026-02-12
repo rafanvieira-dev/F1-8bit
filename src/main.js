@@ -67,7 +67,7 @@ function update(){
     if(gameOver||paused) return;
 
     player.update(input);
-    track.update();
+    track.update(player);
 
     if(checkCollision()) endGame();
 }
