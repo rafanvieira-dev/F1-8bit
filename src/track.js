@@ -45,7 +45,11 @@ update(player){
         /* colisão */
         if(Math.abs(e.y-player.y)<55 &&
            Math.abs(e.x-player.x)<this.laneWidth*0.4){
-            player.crashed=true;
+            track.update(player);
+
+if(player.crashed)
+    endGame();
+
         }
     }
 
