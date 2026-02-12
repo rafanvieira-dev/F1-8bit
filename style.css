@@ -5,12 +5,17 @@ body{
     justify-content:center;
     height:100vh;
     margin:0;
+    touch-action:none;
+    overscroll-behavior:contain;
 }
 
+/* evita blur no pixel art */
 canvas{
-    image-rendering: pixelated;
+    image-rendering:pixelated;
     border:4px solid white;
 }
+
+/* CONTROLES MOBILE (se quiser usar depois) */
 #mobileControls{
     position:fixed;
     bottom:20px;
@@ -38,7 +43,15 @@ canvas{
         display:none;
     }
 }
-body{
-    touch-action: none;
-    overscroll-behavior: contain;
+
+/* HUD texto arcade */
+.hud{
+    position:fixed;
+    top:10px;
+    left:10px;
+    color:white;
+    font-family:monospace;
+    font-size:14px;
+    text-shadow:2px 2px 0 #000;
+    pointer-events:none;
 }
