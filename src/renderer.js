@@ -1,26 +1,37 @@
 /* ===== PISTA ===== */
 export function drawTrack(ctx,track){
 
-    ctx.fillStyle="#3a3a3a";
-    ctx.fillRect(80,0,320,640);
+    const h = track.canvas.height;
+    const roadLeft = track.roadLeft;
+    const roadWidth = track.roadWidth;
+    const right = roadLeft + roadWidth;
 
-    for(let y=track.offset%40;y<640;y+=40){
+    // asfalto
+    ctx.fillStyle="#3a3a3a";
+    ctx.fillRect(roadLeft,0,roadWidth,h);
+
+    // zebras laterais
+    for(let y=track.offset%40;y<h;y+=40){
+
         ctx.fillStyle="#ff0000";
-        ctx.fillRect(80,y,10,20);
-        ctx.fillRect(390,y,10,20);
+        ctx.fillRect(roadLeft,y,10,20);
+        ctx.fillRect(right-10,y,10,20);
 
         ctx.fillStyle="#ffffff";
-        ctx.fillRect(80,y+20,10,20);
-        ctx.fillRect(390,y+20,10,20);
+        ctx.fillRect(roadLeft,y+20,10,20);
+        ctx.fillRect(right-10,y+20,10,20);
     }
 
+    // divisórias das faixas
     ctx.fillStyle="#ffffff";
 
-    // divisórias das 4 faixas
-    for(let y=track.offset%60;y<640;y+=60){
-        ctx.fillRect(160,y,4,30);
-        ctx.fillRect(240,y,4,30);
-        ctx.fillRect(320,y,4,30);
+    for(let i=1;i<track.lanesCount;i++){
+
+        const x = roadLeft + track.laneWidth*i;
+
+        for(let y=track.offset%60;y<h;y+=60){
+            ctx.fillRect(x-2,y,4,30);
+        }
     }
 }
 
@@ -63,16 +74,16 @@ export function drawEnemies(ctx,track){
     }
 }
 
-/* ===== HUD (PONTOS / TEMPO / RECORDE) ===== */
+/* ===== HUD ===== */
 export function drawHUD(ctx,time,speed,record){
 
     ctx.fillStyle="white";
-    ctx.font="12px monospace";
+    ctx.font="14px monospace";
 
-    ctx.fillText(`Tempo: ${time}s`,10,20);
-    ctx.fillText(`Vel: ${speed} kmh`,10,40);
+    ctx.fillText(`Tempo: ${time}s`,20,30);
+    ctx.fillText(`Vel: ${speed} kmh`,20,55);
 
     if(record){
-        ctx.fillText(`REC ${record.name} ${record.speed}kmh`,10,60);
+        ctx.fillText(`REC ${record.name} ${record.kmh}kmh`,20,80);
     }
 }
