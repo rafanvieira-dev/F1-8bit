@@ -1,76 +1,79 @@
 export class Track{
-constructor(canvas){
 
-```
-    this.canvas = canvas;
-    this.offset=0;
-    this.speed=4;
+    constructor(canvas){
 
-    /* largura da pista proporcional */
-    this.roadWidth = canvas.width*0.55;
-    this.left = (canvas.width-this.roadWidth)/2;
-    this.laneWidth = this.roadWidth/4;
+        this.canvas = canvas;
 
-    /* gera 4 faixas dinamicas */
-    this.lanes=[];
-    for(let i=0;i<4;i++){
-        this.lanes.push(this.left+this.laneWidth*(i+0.5));
+        this.offset = 0;
+        this.speed = 4;
+
+        /* largura dinâmica da pista */
+        this.roadWidth = canvas.width * 0.45;
+        this.roadLeft = (canvas.width - this.roadWidth)/2;
+
+        this.lanesCount = 4;
+        this.laneWidth = this.roadWidth/this.lanesCount;
+
+        this.enemies = [];
+        this.spawnTimer = 0;
     }
 
-    this.enemies=[];
-    this.spawnTimer=0;
-    this.kmh=60;
-}
+    update(player){
 
-update(player){
+        /* movimento da pista */
+        this.offset += this.speed;
+        if(this.offset>60) this.offset=0;
 
-    this.offset+=this.speed;
-    if(this.offset>60) this.offset=0;
+        /* aceleração progressiva */
+        this.speed += 0.0025;
 
-    /* aceleração progressiva */
-    this.speed+=0.002;
-    this.kmh=Math.floor(this.speed*18);
+        /* spawn */
+        this.spawnTimer--;
+        if(this.spawnTimer<=0){
+            this.spawnEnemies();
+            this.spawnTimer = 70 - Math.min(55,this.speed*2);
+        }
 
-    /* spawn inimigos */
-    this.spawnTimer--;
-    if(this.spawnTimer<=0){
-        this.spawnEnemies();
-        this.spawnTimer=70-Math.min(50,this.speed*2);
+        /* mover inimigos + colisão */
+        for(const e of this.enemies){
+
+            e.y += this.speed;
+
+            /* colisão real (hitbox maior pro celular) */
+            if(
+                player.x-18 < e.x+18 &&
+                player.x+18 > e.x-18 &&
+                player.y-28 < e.y+28 &&
+                player.y+28 > e.y-28
+            ){
+                player.crashed = true;
+            }
+        }
+
+        /* remover fora da tela */
+        this.enemies = this.enemies.filter(e=>e.y < this.canvas.height+80);
     }
 
-    /* mover inimigos */
-    for(const e of this.enemies){
-        e.y+=this.speed;
+    spawnEnemies(){
 
-        /* colisão */
-        if(Math.abs(e.y-player.y)<55 &&
-           Math.abs(e.x-player.x)<this.laneWidth*0.4){
-            track.update(player);
+        /* uma faixa sempre livre */
+        const freeLane = Math.floor(Math.random()*this.lanesCount);
 
-if(player.crashed)
-    endGame();
+        for(let i=0;i<this.lanesCount;i++){
 
+            if(i===freeLane) continue;
+
+            const x = this.roadLeft + this.laneWidth*i + this.laneWidth/2;
+
+            this.enemies.push({
+                lane:i,
+                x:x,
+                y:-80
+            });
         }
     }
 
-    /* remover fora da tela */
-    this.enemies=this.enemies.filter(e=>e.y<this.canvas.height+100);
-}
-
-spawnEnemies(){
-
-    const freeLane=Math.floor(Math.random()*4);
-
-    for(let i=0;i<4;i++){
-        if(i===freeLane) continue;
-
-        this.enemies.push({
-            lane:i,
-            x:this.lanes[i],
-            y:-80
-        });
+    get kmh(){
+        return Math.floor(this.speed*18);
     }
-}
-```
-
 }
