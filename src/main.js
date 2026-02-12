@@ -7,13 +7,18 @@ const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
 function resize(){
-    const ratio=window.devicePixelRatio||1;
 
-    canvas.width=window.innerWidth*ratio;
-    canvas.height=window.innerHeight*ratio;
+    const ratio = window.devicePixelRatio || 1;
 
-    canvas.style.width=window.innerWidth+"px";
-    canvas.style.height=window.innerHeight+"px";
+    /* resolução interna fixa estilo arcade */
+    const baseWidth = 480;
+    const baseHeight = 640;
+
+    canvas.width = baseWidth * ratio;
+    canvas.height = baseHeight * ratio;
+
+    canvas.style.width = baseWidth + "px";
+    canvas.style.height = baseHeight + "px";
 
     ctx.setTransform(ratio,0,0,ratio,0,0);
 }
