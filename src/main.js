@@ -6,6 +6,21 @@ import {drawTrack,drawCar,drawEnemies,drawHUD} from "./renderer.js";
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
+function resize(){
+    const ratio=window.devicePixelRatio||1;
+
+    canvas.width=window.innerWidth*ratio;
+    canvas.height=window.innerHeight*ratio;
+
+    canvas.style.width=window.innerWidth+"px";
+    canvas.style.height=window.innerHeight+"px";
+
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+}
+
+resize();
+window.addEventListener("resize",resize);
+
 const track=new Track(canvas);
 const player=new Player(track);
 
