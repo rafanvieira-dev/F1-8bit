@@ -6,8 +6,8 @@ import {drawTrack,drawCar,drawEnemies,drawHUD} from "./renderer.js";
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
-const player=new Player();
 const track=new Track(canvas);
+const player=new Player(track);
 
 let start=Date.now();
 let gameOver=false;
