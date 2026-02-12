@@ -7,7 +7,7 @@ const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
 const player=new Player();
-const track=new Track();
+const track=new Track(canvas);
 
 let start=Date.now();
 let gameOver=false;
