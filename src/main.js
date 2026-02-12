@@ -1,63 +1,131 @@
-import {input} from "./input.js";
-import {Player} from "./player.js";
-import {Track} from "./track.js";
-import {drawTrack,drawCar,drawEnemies,drawHUD} from "./renderer.js";
+import { input } from "./input.js";
+import { Player } from "./player.js";
+import { Track } from "./track.js";
+import { drawTrack, drawCar, drawEnemies, drawHUD } from "./renderer.js";
 
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-/* RESOLUÇÃO BASE DO JOGO */
-const GAME_WIDTH=360;
-const GAME_HEIGHT=640;
+/* detectar desktop */
+const isDesktop = window.innerWidth > window.innerHeight;
 
-let scale=1;
+/* resolução base dinâmica */
+const GAME_WIDTH = isDesktop ? 720 : 360;
+const GAME_HEIGHT = isDesktop ? 900 : 640;
 
-function resize(){
+let scale = 1;
 
-    const sw=window.innerWidth;
-    const sh=window.innerHeight;
+function resize() {
 
-    scale=Math.min(sw/GAME_WIDTH,sh/GAME_HEIGHT);
+    const sw = window.innerWidth;
+    const sh = window.innerHeight;
 
-    canvas.width=GAME_WIDTH;
-    canvas.height=GAME_HEIGHT;
+    scale = Math.min(sw / GAME_WIDTH, sh / GAME_HEIGHT);
 
-    canvas.style.width=(GAME_WIDTH*scale)+"px";
-    canvas.style.height=(GAME_HEIGHT*scale)+"px";
+    canvas.width = GAME_WIDTH;
+    canvas.height = GAME_HEIGHT;
+
+    canvas.style.width = (GAME_WIDTH * scale) + "px";
+    canvas.style.height = (GAME_HEIGHT * scale) + "px";
 }
 
 resize();
-window.addEventListener("resize",resize);
+window.addEventListener("resize", resize);
 
-const track=new Track(canvas);
-const player=new Player(track);
+const track = new Track(canvas);
+const player = new Player(track);
 
-let start=Date.now();
-let gameOver=false;
+let start = Date.now();
+let gameOver = false;
+let record = JSON.parse(localStorage.getItem("f1record"));
 
-/* LOOP */
-function update(){
-    if(gameOver) return;
+/* ================= MUSICA ARCADE ================= */
+const music = new Audio("../music/music.mp3");
+music.loop = true;
+music.volume = 0.4;
+
+let musicStarted = false;
+
+function tryStartMusic() {
+    if (musicStarted) return;
+    musicStarted = true;
+    music.play().catch(() => { });
+}
+
+/* pausa no P */
+document.addEventListener("keydown", (e) => {
+    if (e.key === "p") paused = !paused;
+});
+
+/* ================= FIM DE JOGO ================= */
+function saveRecord() {
+    const time = ((Date.now() - start) / 1000).toFixed(1);
+    const kmh = track.kmh;
+
+    if (!record || kmh > record.kmh) {
+
+        let name = prompt("NOVO RECORDE! 3 letras:");
+        if (!name) name = "???";
+
+        record = {
+            name: name.substring(0, 3).toUpperCase(),
+            time,
+            kmh
+        };
+
+        localStorage.setItem("f1record", JSON.stringify(record));
+    }
+}
+
+function endGame() {
+    gameOver = true;
+    saveRecord();
+}
+
+/* ================= UPDATE ================= */
+function update() {
+    if (gameOver) return;
 
     player.update(input);
     track.update(player);
 
-    if(player.crashed) location.reload();
+    if (player.crashed) {
+        gameOver = true;
+        saveRecord();
+    }
 }
 
-function render(){
+/* ================= RENDER ================= */
+function render() {
+    ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT);
+    drawTrack(ctx, track);
+    drawEnemies(ctx, track);
+    drawCar(ctx, player);
 
-    drawTrack(ctx,track);
-    drawEnemies(ctx,track);
-    drawCar(ctx,player);
+    const time = ((Date.now() - start) / 1000).toFixed(1);
+    drawHUD(ctx, time, track.kmh, record);
 
-    const time=((Date.now()-start)/1000).toFixed(1);
-    drawHUD(ctx,time,track.kmh,null);
+    if (gameOver) {
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        ctx.fillStyle = "white";
+        ctx.font = "28px monospace";
+        ctx.fillText("GAME OVER", GAME_WIDTH / 2 - 90, GAME_HEIGHT / 2);
+
+        ctx.font = "16px monospace";
+        ctx.fillText("Pressione R para reiniciar", GAME_WIDTH / 2 - 110, GAME_HEIGHT / 2 + 40);
+    }
 }
 
-function loop(){
+document.addEventListener("keydown", (e) => {
+    if (gameOver && e.key.toLowerCase() === "r")
+        location.reload();
+});
+
+/* ================= LOOP ================= */
+function loop() {
     update();
     render();
     requestAnimationFrame(loop);
