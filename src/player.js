@@ -1,35 +1,42 @@
 export class Player{
-constructor(track){
 
-```
-    this.track=track;
+    constructor(track){
 
-    this.lane=1;
-    this.x=track.lanes[this.lane];
-    this.targetX=this.x;
+        this.track = track;
 
-    this.y=track.canvas.height*0.82;
-    this.cooldown=0;
-    this.crashed=false;
-}
+        this.lane = 1;
+        this.x = 0;
+        this.targetX = 0;
+        this.y = track.canvas.height - 120;
 
-update(input){
+        this.cooldown = 0;
+        this.crashed = false;
 
-    if(this.cooldown>0) this.cooldown--;
-
-    if(input.left && this.cooldown===0){
-        this.lane=Math.max(0,this.lane-1);
-        this.cooldown=8;
+        this.updateLanePosition();
     }
 
-    if(input.right && this.cooldown===0){
-        this.lane=Math.min(3,this.lane+1);
-        this.cooldown=8;
+    updateLanePosition(){
+        const laneWidth = this.track.roadWidth / this.track.lanesCount;
+        this.targetX = this.track.roadLeft + laneWidth*this.lane + laneWidth/2;
+        if(this.x===0) this.x=this.targetX;
     }
 
-    this.targetX=this.track.lanes[this.lane];
-    this.x+= (this.targetX-this.x)*0.25;
-}
-```
+    update(input){
 
+        if(this.cooldown>0) this.cooldown--;
+
+        if(input.left && this.cooldown===0){
+            this.lane=Math.max(0,this.lane-1);
+            this.cooldown=8;
+            this.updateLanePosition();
+        }
+
+        if(input.right && this.cooldown===0){
+            this.lane=Math.min(this.track.lanesCount-1,this.lane+1);
+            this.cooldown=8;
+            this.updateLanePosition();
+        }
+
+        this.x += (this.targetX-this.x)*0.25;
+    }
 }
