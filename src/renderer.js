@@ -1,25 +1,42 @@
+/* ===================== PISTA ===================== */
 export function drawTrack(ctx,track){
 
-    ctx.fillStyle="#3a3a3a";
-    ctx.fillRect(120,0,240,640);
+    const left = track.roadLeft;
+    const width = track.roadWidth;
+    const right = left + width;
+    const h = ctx.canvas.height;
 
-    for(let y=track.offset%40;y<640;y+=40){
+    // asfalto
+    ctx.fillStyle="#3a3a3a";
+    ctx.fillRect(left,0,width,h);
+
+    // zebra lateral (vermelho/branco)
+    for(let y=track.offset%40;y<h;y+=40){
+
         ctx.fillStyle="#ff0000";
-        ctx.fillRect(120,y,10,20);
-        ctx.fillRect(350,y,10,20);
+        ctx.fillRect(left,y,10,20);
+        ctx.fillRect(right-10,y,10,20);
 
         ctx.fillStyle="#ffffff";
-        ctx.fillRect(120,y+20,10,20);
-        ctx.fillRect(350,y+20,10,20);
+        ctx.fillRect(left,y+20,10,20);
+        ctx.fillRect(right-10,y+20,10,20);
     }
 
+    // linhas centrais (divisões das 4 faixas)
     ctx.fillStyle="#ffffff";
-    for(let y=track.offset%60;y<640;y+=60){
-        ctx.fillRect(238,y,4,30);
+
+    for(let i=1;i<track.lanes;i++){
+
+        const x = left + i*track.laneWidth;
+
+        for(let y=track.offset%60;y<h;y+=60){
+            ctx.fillRect(x-2,y,4,30);
+        }
     }
 }
 
-/* ===== CARRO F1 DETALHADO ===== */
+
+/* ===================== CARRO F1 PIXEL ===================== */
 function drawF1(ctx,x,y,main,second,visor){
 
     // sombra
@@ -53,38 +70,30 @@ function drawF1(ctx,x,y,main,second,visor){
     ctx.fillRect(x+8,y-6,6,10);
 }
 
-/* ===== PLAYER — McLaren Senna ===== */
+
+/* ===================== PLAYER — McLaren Senna ===================== */
 export function drawCar(ctx,p){
-    drawF1(
-        ctx,
-        p.x,
-        p.y,
-        "#ffffff",   // corpo branco
-        "#e10600",   // asas vermelhas
-        "#00d0ff"    // visor azul
-    );
+    drawF1(ctx,p.x,p.y,"#ffffff","#e10600","#00d0ff");
 }
 
-/* ===== INIMIGOS — azul e amarelo ===== */
+
+/* ===================== INIMIGOS ===================== */
 export function drawEnemies(ctx,track){
     for(const e of track.enemies){
-        drawF1(
-            ctx,
-            e.x,
-            e.y,
-            "#0033cc", // azul
-            "#ffd400", // amarelo
-            "#00d0ff"
-        );
+        drawF1(ctx,e.x,e.y,"#0033cc","#ffd400","#00d0ff");
     }
 }
 
-export function drawHUD(ctx,time,speed,record){
+
+/* ===================== HUD ARCADE ===================== */
+export function drawCockpit(ctx,score,speed,record){
+
     ctx.fillStyle="white";
-    ctx.font="12px monospace";
-    ctx.fillText(`Tempo: ${time}s`,10,20);
-    ctx.fillText(`Vel: ${speed}`,10,40);
+    ctx.font="14px monospace";
+
+    ctx.fillText(`KMH ${speed}`,10,20);
+    ctx.fillText(`SCORE ${score}`,10,40);
 
     if(record)
-        ctx.fillText(`REC ${record.name} ${record.time}s`,10,60);
+        ctx.fillText(`BEST ${record}`,10,60);
 }
