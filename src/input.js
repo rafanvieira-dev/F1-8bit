@@ -1,57 +1,45 @@
 export const input = {
-    left:false,
-    right:false
+    left: false,
+    right: false
 };
 
-let pressed = {
-    left:false,
-    right:false
-};
+let lock = false;  // Prevenir múltiplos toques
 
 const canvas = document.getElementById("game");
 
-/* ===== TECLADO ===== */
+// teclado
+document.addEventListener("keydown", e => {
+    if (lock) return;
 
-document.addEventListener("keydown",e=>{
-
-    if(e.key==="ArrowLeft" && !pressed.left){
+    if (e.key === "ArrowLeft") {
         input.left = true;
-        pressed.left = true;
+        lock = true;
     }
 
-    if(e.key==="ArrowRight" && !pressed.right){
+    if (e.key === "ArrowRight") {
         input.right = true;
-        pressed.right = true;
+        lock = true;
     }
 });
 
-document.addEventListener("keyup",e=>{
-
-    if(e.key==="ArrowLeft") pressed.left=false;
-    if(e.key==="ArrowRight") pressed.right=false;
+document.addEventListener("keyup", e => {
+    input.left = false;
+    input.right = false;
+    lock = false;
 });
 
-
-/* ===== TOQUE (1 toque = 1 ação) ===== */
-
-canvas.addEventListener("touchstart",e=>{
+// toque mobile
+canvas.addEventListener("touchstart", e => {
     e.preventDefault();
-
     const rect = canvas.getBoundingClientRect();
     const x = e.touches[0].clientX - rect.left;
-    const mid = rect.width/2;
 
-    if(x < mid){
-        input.left = true;
-    }else{
-        input.right = true;
-    }
+    if (x < rect.width / 2) input.left = true;
+    else input.right = true;
 
-},{passive:false});
+}, { passive: false });
 
-
-/* ===== LIMPA O INPUT A CADA FRAME ===== */
-export function resetInput(){
-    input.left=false;
-    input.right=false;
-}
+canvas.addEventListener("touchend", () => {
+    input.left = false;
+    input.right = false;
+});
