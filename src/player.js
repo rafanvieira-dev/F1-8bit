@@ -7,7 +7,7 @@ export class Player {
         this.x = this.track.lanes[this.lane];  // posição inicial no meio
         this.targetX = this.x;
 
-        this.y = track.canvas.height * 0.82;  // mais perto da base da tela
+        this.y = 560; // mais perto da base da tela
         this.cooldown = 0;
         this.crashed = false;
 
