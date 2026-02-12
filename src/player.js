@@ -1,43 +1,35 @@
 export class Player{
+constructor(track){
 
-    constructor(track){
+```
+    this.track=track;
 
-        this.track=track;
+    this.lane=1;
+    this.x=track.lanes[this.lane];
+    this.targetX=this.x;
 
-        this.lane=1;
-        this.x=0;
-        this.targetX=0;
+    this.y=track.canvas.height*0.82;
+    this.cooldown=0;
+    this.crashed=false;
+}
 
-        this.y=520;
-        this.cooldown=0;
-        this.crashed=false;
+update(input){
 
-        this.updateLanePosition();
+    if(this.cooldown>0) this.cooldown--;
+
+    if(input.left && this.cooldown===0){
+        this.lane=Math.max(0,this.lane-1);
+        this.cooldown=8;
     }
 
-    updateLanePosition(){
-        this.targetX=
-            this.track.roadLeft+
-            this.track.laneWidth*this.lane+
-            this.track.laneWidth/2;
+    if(input.right && this.cooldown===0){
+        this.lane=Math.min(3,this.lane+1);
+        this.cooldown=8;
     }
 
-    update(input){
+    this.targetX=this.track.lanes[this.lane];
+    this.x+= (this.targetX-this.x)*0.25;
+}
+```
 
-        if(this.cooldown>0) this.cooldown--;
-
-        if(input.left && this.cooldown===0){
-            this.lane=Math.max(0,this.lane-1);
-            this.cooldown=8;
-            this.updateLanePosition();
-        }
-
-        if(input.right && this.cooldown===0){
-            this.lane=Math.min(3,this.lane+1);
-            this.cooldown=8;
-            this.updateLanePosition();
-        }
-
-        this.x+=(this.targetX-this.x)*0.25;
-    }
 }
