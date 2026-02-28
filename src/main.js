@@ -16,7 +16,6 @@ const GAME_HEIGHT = isDesktop ? 900 : 640;
 let scale = 1;
 
 function resize() {
-
     const sw = window.innerWidth;
     const sh = window.innerHeight;
 
@@ -39,20 +38,7 @@ let start = Date.now();
 let gameOver = false;
 let record = JSON.parse(localStorage.getItem("f1record"));
 
-/* ================= MUSICA ARCADE ================= */
-const music = new Audio("../music/music.mp3");
-music.loop = true;
-music.volume = 0.4;
-
-let musicStarted = false;
-
-function tryStartMusic() {
-    if (musicStarted) return;
-    musicStarted = true;
-    music.play().catch(() => { });
-}
-
-/* pausa no P */
+let paused = false;
 document.addEventListener("keydown", (e) => {
     if (e.key === "p") paused = !paused;
 });
@@ -60,10 +46,9 @@ document.addEventListener("keydown", (e) => {
 /* ================= FIM DE JOGO ================= */
 function saveRecord() {
     const time = ((Date.now() - start) / 1000).toFixed(1);
-    const kmh = track.kmh;
+    const kmh = Math.floor(player.speed);
 
     if (!record || kmh > record.kmh) {
-
         let name = prompt("NOVO RECORDE! 3 letras:");
         if (!name) name = "???";
 
@@ -77,14 +62,9 @@ function saveRecord() {
     }
 }
 
-function endGame() {
-    gameOver = true;
-    saveRecord();
-}
-
 /* ================= UPDATE ================= */
 function update() {
-    if (gameOver) return;
+    if (gameOver || paused) return;
 
     player.update(input);
     track.update(player);
@@ -104,7 +84,7 @@ function render() {
     drawCar(ctx, player);
 
     const time = ((Date.now() - start) / 1000).toFixed(1);
-    drawHUD(ctx, time, track.kmh, record);
+    drawHUD(ctx, time, Math.floor(player.speed), record);
 
     if (gameOver) {
         ctx.fillStyle = "rgba(0,0,0,0.6)";
