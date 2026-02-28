@@ -2,39 +2,59 @@ export class Player {
 
     constructor(track) {
         this.track = track;
+        // Posição inicial no centro da pista
+        this.x = track.roadLeft + (track.roadWidth / 2);
+        this.y = 560; 
+        
+        // Física estilo Top Gear
+        this.speed = 0;
+        this.maxSpeed = 230; // km/h
+        this.accel = 1.5;
+        this.braking = 3.0;
+        this.friction = 0.5;
+        this.turnSpeed = 5.0;
 
-        this.lane = 1;
-        this.x = this.track.lanes[this.lane];  // posição inicial no meio
-        this.targetX = this.x;
-
-        this.y = 560; // mais perto da base da tela
-        this.cooldown = 0;
         this.crashed = false;
-
-        this.updateLanePosition();
-    }
-
-    updateLanePosition() {
-        const laneWidth = this.track.laneWidth;
-        this.targetX = this.track.roadLeft + laneWidth * this.lane + laneWidth / 2;
-        if (this.x === 0) this.x = this.targetX;
     }
 
     update(input) {
-        if (this.cooldown > 0) this.cooldown--;
-
-        if (input.left && this.cooldown === 0) {
-            this.lane = Math.max(0, this.lane - 1);
-            this.cooldown = 8;
-            this.updateLanePosition();
+        // 1. Aceleração e Frenagem
+        if (input.up) {
+            this.speed += this.accel;
+        } else if (input.down) {
+            this.speed -= this.braking;
+        } else {
+            // Atrito natural soltando o acelerador
+            this.speed -= this.friction; 
         }
 
-        if (input.right && this.cooldown === 0) {
-            this.lane = Math.min(this.track.lanesCount - 1, this.lane + 1);
-            this.cooldown = 8;
-            this.updateLanePosition();
+        // Limita a velocidade entre 0 e a Máxima
+        if (this.speed < 0) this.speed = 0;
+        if (this.speed > this.maxSpeed) this.speed = this.maxSpeed;
+
+        // 2. Direção (Só consegue virar bem se tiver velocidade)
+        let speedFactor = this.speed / this.maxSpeed; 
+        
+        if (input.left && this.speed > 0) {
+            this.x -= this.turnSpeed * (speedFactor + 0.4); // +0.4 garante que vire mesmo devagar
+        }
+        if (input.right && this.speed > 0) {
+            this.x += this.turnSpeed * (speedFactor + 0.4);
         }
 
-        this.x += (this.targetX - this.x) * 0.25;  // suaviza o movimento
+        // 3. Limites da Pista (Bater na grama freia o carro)
+        const leftEdge = this.track.roadLeft + 15;
+        const rightEdge = this.track.roadLeft + this.track.roadWidth - 15;
+
+        if (this.x < leftEdge) {
+            this.x = leftEdge;
+            this.speed -= this.friction * 2; 
+        }
+        if (this.x > rightEdge) {
+            this.x = rightEdge;
+            this.speed -= this.friction * 2; 
+        }
+        
+        if (this.speed < 0) this.speed = 0;
     }
 }
