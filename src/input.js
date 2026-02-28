@@ -1,43 +1,36 @@
 export const input = {
     left: false,
     right: false,
+    up: false,
+    down: false,
     touch: false
 };
 
-let keyCooldown = 0;  // Controla a sensibilidade do teclado
 const canvas = document.getElementById("game");
 
-// teclado
+// Teclado
 document.addEventListener("keydown", (e) => {
-    if (keyCooldown > 0) return; // Impede múltiplos toques rapidamente
-
-    if (e.key === "ArrowLeft") {
-        input.left = true;
-        keyCooldown = 10; // Intervalo de tempo entre os comandos
-    }
-
-    if (e.key === "ArrowRight") {
-        input.right = true;
-        keyCooldown = 10; // Intervalo de tempo entre os comandos
-    }
+    if (e.key === "ArrowLeft") input.left = true;
+    if (e.key === "ArrowRight") input.right = true;
+    if (e.key === "ArrowUp") input.up = true;
+    if (e.key === "ArrowDown") input.down = true;
 });
 
 document.addEventListener("keyup", (e) => {
     if (e.key === "ArrowLeft") input.left = false;
     if (e.key === "ArrowRight") input.right = false;
+    if (e.key === "ArrowUp") input.up = false;
+    if (e.key === "ArrowDown") input.down = false;
 });
 
-// Aumenta o cooldown do teclado
-setInterval(() => {
-    if (keyCooldown > 0) keyCooldown--; // Reduz o cooldown do teclado a cada 100ms
-}, 100);
-
-// controle de toque
+// Controle de toque (Lados da tela viram, segurar acelera automaticamente)
 canvas.addEventListener("touchstart", touch, { passive: false });
 canvas.addEventListener("touchmove", touch, { passive: false });
 canvas.addEventListener("touchend", () => {
     input.left = false;
     input.right = false;
+    input.up = false;
+    input.down = false;
     input.touch = false;
 });
 
@@ -55,5 +48,6 @@ function touch(e) {
         input.left = false;
     }
 
-    input.touch = true; // Marca que há um toque ativo
+    input.up = true; // No mobile, tocar na tela já acelera
+    input.touch = true;
 }
