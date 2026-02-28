@@ -4,46 +4,42 @@ export class Track {
         this.canvas = canvas;
 
         this.offset = 0;
-        this.speed = 4;
 
         /* largura dinâmica da pista */
         this.roadWidth = canvas.width * 0.45;
         this.roadLeft = (canvas.width - this.roadWidth) / 2;
 
-        /* 4 faixas com largura proporcional */
+        /* Mantemos isso apenas para o renderer desenhar as faixas brancas no chão */
         this.lanesCount = 4;
         this.laneWidth = this.roadWidth / this.lanesCount;
-
-        this.lanes = [];
-        for (let i = 0; i < this.lanesCount; i++) {
-            this.lanes.push(this.roadLeft + this.laneWidth * i + this.laneWidth / 2);
-        }
 
         this.enemies = [];
         this.spawnTimer = 0;
     }
 
     update(player) {
+        /* A pista se move na velocidade do jogador */
+        let visualSpeed = player.speed * 0.05; // Fator para converter km/h em pixels
+        
+        this.offset += visualSpeed;
+        if (this.offset > 60) this.offset -= 60;
 
-        /* movimento da pista */
-        this.offset += this.speed;
-        if (this.offset > 60) this.offset = 0;
-
-        /* aceleração progressiva */
-        this.speed += 0.0025;
-
-        /* spawn de inimigos */
+        /* spawn de inimigos baseados na velocidade */
         this.spawnTimer--;
         if (this.spawnTimer <= 0) {
             this.spawnEnemies();
-            this.spawnTimer = 70 - Math.min(50, this.speed * 2);
+            // Inimigos aparecem mais rápido se o player estiver em alta velocidade
+            this.spawnTimer = Math.max(30, 100 - (player.speed * 0.2));
         }
 
-        /* mover inimigos + verificar colisão */
+        /* mover inimigos (velocidade relativa) + verificar colisão */
         for (const e of this.enemies) {
-            e.y += this.speed;
+            let enemyVisualSpeed = e.speed * 0.05;
+            
+            // A posição do inimigo na tela depende da diferença entre a sua velocidade e a dele
+            e.y += (visualSpeed - enemyVisualSpeed);
 
-            /* colisão (ajustando a hitbox para o celular) */
+            /* colisão */
             if (
                 player.x - 18 < e.x + 18 &&
                 player.x + 18 > e.x - 18 &&
@@ -54,27 +50,21 @@ export class Track {
             }
         }
 
-        /* remover inimigos fora da tela */
-        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 80);
+        /* remover inimigos que ficaram muito para trás ou sumiram na frente */
+        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 80 && e.y > -200);
     }
 
     spawnEnemies() {
-        /* uma faixa sempre livre */
-        const freeLane = Math.floor(Math.random() * this.lanesCount);
+        // Escolhe uma posição X aleatória dentro dos limites do asfalto
+        const padding = 25;
+        const minX = this.roadLeft + padding;
+        const maxX = this.roadLeft + this.roadWidth - padding;
+        const randomX = Math.random() * (maxX - minX) + minX;
 
-        for (let i = 0; i < this.lanesCount; i++) {
-            if (i === freeLane) continue;
-
-            const x = this.lanes[i];
-            this.enemies.push({
-                lane: i,
-                x: x,
-                y: -80
-            });
-        }
-    }
-
-    get kmh() {
-        return Math.floor(this.speed * 18);
+        this.enemies.push({
+            x: randomX,
+            y: -80,
+            speed: 100 + Math.random() * 60 // Inimigos correm entre 100 e 160 km/h
+        });
     }
 }
