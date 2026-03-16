@@ -14,7 +14,6 @@ export class Track {
     }
 
     update(player, level) {
-        // A pista rola para baixo baseada na velocidade do player
         let visualSpeed = player.speed * 0.05; 
         
         this.offset += visualSpeed;
@@ -22,20 +21,25 @@ export class Track {
             this.offset -= this.canvas.height; 
         }
 
-        // Sistema de tempo para criar a próxima "onda" de carros
-        this.spawnTimer--;
-        if (this.spawnTimer <= 0) {
-            this.spawnEnemies(level);
-            // O tempo entre as ondas diminui conforme o level e a sua velocidade
-            // O Math.max(45) garante que as ondas nunca nasçam coladas uma na outra
-            this.spawnTimer = Math.max(45, 120 - (level * 5) - (player.speed * 0.1));
+        let difficultyTier = Math.floor((level - 1) / 5);
+
+        // ========================================================
+        // NOVO: SÓ GERA UM INIMIGO SE A PISTA ESTIVER VAZIA
+        // ========================================================
+        if (this.enemies.length === 0) {
+            this.spawnTimer--;
+            if (this.spawnTimer <= 0) {
+                this.spawnEnemies(player, difficultyTier);
+                // Temporizador mais curto para o jogo não ficar parado muito tempo
+                this.spawnTimer = Math.max(10, 40 - (difficultyTier * 2)); 
+            }
         }
 
         for (const e of this.enemies) {
-            // ESTILO TETRIS: O inimigo cai com a própria velocidade SOMADA à velocidade que você está correndo
-            e.y += e.baseSpeed + visualSpeed;
+            let enemyVisualSpeed = e.speed * 0.05;
+            e.y += (visualSpeed - enemyVisualSpeed);
 
-            // Verificação de colisão
+            // Colisão com o jogador
             if (
                 player.x - 26 < e.x + 26 &&
                 player.x + 26 > e.x - 26 &&
@@ -46,37 +50,32 @@ export class Track {
             }
         }
 
-        // Limpa inimigos que já passaram do fundo da tela
-        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 150);
+        // Remove o inimigo quando ele sai bem de fora do ecrã
+        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 350 && e.y > -350);
     }
 
-    spawnEnemies(level) {
-        // Define quantos carros vão nascer nesta onda (mínimo 1, máximo 3)
-        // A chance de vir 2 ou 3 carros aumenta com o level. NUNCA 4, para sempre sobrar 1 faixa!
-        let maxCars = 1 + Math.floor(Math.random() * (level / 3 + 1));
-        if (maxCars > 3) maxCars = 3;
-        if (maxCars < 1) maxCars = 1;
+    spawnEnemies(player, difficultyTier) {
+        // Como só há um inimigo, não precisamos de testar as faixas! Basta escolher uma ao acaso.
+        let lane = Math.floor(Math.random() * this.lanesCount);
+        let spawnX = this.roadLeft + (this.laneWidth * lane) + (this.laneWidth / 2);
 
-        // Cria uma lista com as 4 faixas [0, 1, 2, 3] e embaralha para escolher aleatoriamente onde os carros não vão estar
-        let availableLanes = [0, 1, 2, 3];
-        availableLanes.sort(() => Math.random() - 0.5);
-        
-        // Pega apenas a quantidade de faixas sorteadas
-        let chosenLanes = availableLanes.slice(0, maxCars);
+        let baseEnemySpeed = 100 + (difficultyTier * 15);
+        let enemySpeed = baseEnemySpeed + Math.random() * 50; 
 
-        // Velocidade de queda base dos inimigos aumenta com o level
-        let fallSpeed = 3 + (level * 0.8);
-
-        // Cria os carros em bloco (onda) nas faixas sorteadas
-        for (let lane of chosenLanes) {
-            let spawnX = this.roadLeft + (this.laneWidth * lane) + (this.laneWidth / 2);
-            
-            this.enemies.push({
-                x: spawnX,
-                y: -150, // Nascem todos alinhados lá em cima, de fora da tela
-                baseSpeed: fallSpeed, 
-                spriteType: Math.random() > 0.5 ? 0 : 1 // Sorteia a cor (verde ou azul) 50/50
-            });
+        // Carro "Apressadinho" que vem de trás
+        if (Math.random() < 0.20 + (difficultyTier * 0.05)) {
+            enemySpeed = 240 + Math.random() * 30; 
         }
+
+        // Nasce atrás se for mais rápido, ou à frente se for mais lento
+        let spawnY = (enemySpeed > player.speed) ? this.canvas.height + 250 : -250;
+
+        // Adiciona o único carro à pista
+        this.enemies.push({
+            x: spawnX,
+            y: spawnY, 
+            speed: enemySpeed,
+            spriteType: Math.random() > 0.5 ? 0 : 1 // Sorteia cor verde ou azul
+        });
     }
 }
