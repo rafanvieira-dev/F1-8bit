@@ -21,25 +21,18 @@ export class Track {
             this.offset -= this.canvas.height; 
         }
 
-        let difficultyTier = Math.floor((level - 1) / 5);
-
-        // ========================================================
-        // NOVO: SÓ GERA UM INIMIGO SE A PISTA ESTIVER VAZIA
-        // ========================================================
-        if (this.enemies.length === 0) {
-            this.spawnTimer--;
-            if (this.spawnTimer <= 0) {
-                this.spawnEnemies(player, difficultyTier);
-                // Temporizador mais curto para o jogo não ficar parado muito tempo
-                this.spawnTimer = Math.max(10, 40 - (difficultyTier * 2)); 
-            }
+        this.spawnTimer--;
+        if (this.spawnTimer <= 0) {
+            this.spawnEnemies(level);
+            // Dificuldade Aumentada: O timer agora diminui mais drasticamente
+            // Nível 1 começa em ~80, mas cai rapidamente para o mínimo de 30
+            this.spawnTimer = Math.max(30, 100 - (level * 10) - (player.speed * 0.12));
         }
 
         for (const e of this.enemies) {
-            let enemyVisualSpeed = e.speed * 0.05;
-            e.y += (visualSpeed - enemyVisualSpeed);
+            // Dificuldade Aumentada: Inimigos descem mais rápido
+            e.y += e.baseSpeed + visualSpeed;
 
-            // Colisão com o jogador
             if (
                 player.x - 26 < e.x + 26 &&
                 player.x + 26 > e.x - 26 &&
@@ -50,32 +43,37 @@ export class Track {
             }
         }
 
-        // Remove o inimigo quando ele sai bem de fora do ecrã
-        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 350 && e.y > -350);
+        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 150);
     }
 
-    spawnEnemies(player, difficultyTier) {
-        // Como só há um inimigo, não precisamos de testar as faixas! Basta escolher uma ao acaso.
-        let lane = Math.floor(Math.random() * this.lanesCount);
-        let spawnX = this.roadLeft + (this.laneWidth * lane) + (this.laneWidth / 2);
+    spawnEnemies(level) {
+        // Dificuldade Aumentada: Mais chances de virem 3 carros simultâneos a partir do nível 3
+        let maxCars = 1 + Math.floor(Math.random() * (level / 2 + 1));
+        if (maxCars > 3) maxCars = 3;
 
-        let baseEnemySpeed = 100 + (difficultyTier * 15);
-        let enemySpeed = baseEnemySpeed + Math.random() * 50; 
+        let availableLanes = [0, 1, 2, 3];
+        availableLanes.sort(() => Math.random() - 0.5); 
+        let chosenLanes = availableLanes.slice(0, maxCars);
 
-        // Carro "Apressadinho" que vem de trás
-        if (Math.random() < 0.20 + (difficultyTier * 0.05)) {
-            enemySpeed = 240 + Math.random() * 30; 
+        // Dificuldade Aumentada: Velocidade base de queda subiu de 3 para 5 + nível
+        let fallSpeed = 5 + (level * 1.2);
+
+        let ySpread = 0;
+
+        for (let lane of chosenLanes) {
+            let spawnX = this.roadLeft + (this.laneWidth * lane) + (this.laneWidth / 2);
+            
+            // Reduzi o espalhamento vertical para os carros ficarem mais próximos e perigosos
+            let randomY = -150 - ySpread - (Math.random() * 50);
+            
+            this.enemies.push({
+                x: spawnX,
+                y: randomY, 
+                baseSpeed: fallSpeed, 
+                spriteType: Math.random() > 0.5 ? 0 : 1 
+            });
+
+            ySpread += 100 + Math.random() * 60;
         }
-
-        // Nasce atrás se for mais rápido, ou à frente se for mais lento
-        let spawnY = (enemySpeed > player.speed) ? this.canvas.height + 250 : -250;
-
-        // Adiciona o único carro à pista
-        this.enemies.push({
-            x: spawnX,
-            y: spawnY, 
-            speed: enemySpeed,
-            spriteType: Math.random() > 0.5 ? 0 : 1 // Sorteia cor verde ou azul
-        });
     }
 }
