@@ -56,7 +56,7 @@ export function drawStartScreen(ctx) {
     
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 50px monospace";
-    ctx.fillText("8-BIT", w / 2, h * 0.4);
+    ctx.fillText("32-BIT", w / 2, h * 0.4);
 
     ctx.fillStyle = "#aaaaaa";
     ctx.font = "18px monospace";
