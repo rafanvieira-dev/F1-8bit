@@ -60,8 +60,8 @@ function drawF1(ctx, x, y, main, second, visor) {
 
 export function drawCar(ctx, p) {
     if (spritePlayer.complete && spritePlayer.naturalWidth !== 0) {
-        // Carro do jogador aumentado para 60x90
-        ctx.drawImage(spritePlayer, p.x - 30, p.y - 45, 60, 90);
+        // Player: 60 de largura, 100 de altura (centralizado em -30 e -50)
+        ctx.drawImage(spritePlayer, p.x - 30, p.y - 50, 60, 100);
     } else {
         drawF1(ctx, p.x, p.y, "#ffffff", "#e10600", "#00d0ff");
     }
@@ -72,8 +72,8 @@ export function drawEnemies(ctx, track) {
         let sprite = (Math.floor(e.x) % 2 === 0) ? enemySprites[0] : enemySprites[1];
 
         if (sprite.complete && sprite.naturalWidth !== 0) {
-            // Carros inimigos do mesmo tamanho: 60x90
-            ctx.drawImage(sprite, e.x - 30, e.y - 45, 60, 90);
+            // Inimigos: Exatamente o mesmo tamanho e centralização do Player (60x100)
+            ctx.drawImage(sprite, e.x - 30, e.y - 50, 60, 100);
         } else {
             drawF1(ctx, e.x, e.y, "#0033cc", "#ffd400", "#00d0ff");
         }
