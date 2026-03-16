@@ -1,7 +1,8 @@
 import { input } from "./input.js";
 import { Player } from "./player.js";
 import { Track } from "./track.js";
-import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen } from "./renderer.js";
+// NOVO: Adicionado import da drawGameOverScreen
+import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen, drawGameOverScreen } from "./renderer.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -32,13 +33,25 @@ let score = 0;
 let level = 1;
 let paused = false;
 
+// NOVO: Variáveis do Mentor
+let supportMessage = "";
+const tips = [
+    "Dica: Solte o acelerador para desviar melhor.",
+    "Boa pilotagem! Treine antecipar os movimentos.",
+    "Atenção aos carros rápidos que vêm de trás!",
+    "Continue assim! Seus reflexos estão ótimos.",
+    "Frear também faz parte de uma boa pilotagem.",
+    "Você tem talento! Só precisa de mais pista.",
+    "Quase lá! Cada erro é uma lição na F1."
+];
+
 document.addEventListener("keydown", (e) => {
     if (e.key === "p" && gameState === "PLAYING") paused = !paused;
-    if (e.key.toLowerCase() === "r" && gameState === "GAMEOVER") location.reload();
+    if (e.key.toLowerCase() === "r" && (gameState === "GAMEOVER" || gameState === "WIN")) location.reload();
 });
 
 canvas.addEventListener("touchstart", () => {
-    if (gameState === "GAMEOVER") location.reload();
+    if (gameState === "GAMEOVER" || gameState === "WIN") location.reload();
 });
 
 function update() {
@@ -49,16 +62,22 @@ function update() {
         return;
     }
 
-    if (gameState === "GAMEOVER" || paused) return;
+    if (gameState === "GAMEOVER" || gameState === "WIN" || paused) return;
 
-    player.update(input);
+    // Passamos o level para o player saber a hora de aumentar a velocidade máxima
+    player.update(input, level);
     track.update(player, level);
 
     score += player.speed * 0.015;
     level = Math.floor(score / 500) + 1;
 
-    if (player.crashed) {
+    // NOVO: Verifica condição de Vitória ou Derrota
+    if (level >= 100) {
+        gameState = "WIN";
+        supportMessage = "Parabéns! Sua pilotagem foi impecável. Você ganhou a corrida!";
+    } else if (player.crashed) {
         gameState = "GAMEOVER";
+        supportMessage = tips[Math.floor(Math.random() * tips.length)];
     }
 }
 
@@ -76,24 +95,10 @@ function render() {
     drawCar(ctx, player);
     drawHUD(ctx, score, level, Math.floor(player.speed));
 
-    if (gameState === "GAMEOVER") {
-        ctx.fillStyle = "rgba(0,0,0,0.85)";
-        ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.font = "bold 36px monospace";
-        ctx.fillText("GAME OVER", GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20);
-
-        ctx.fillStyle = "#ffd400";
-        ctx.font = "bold 24px monospace";
-        ctx.fillText(`PONTOS: ${Math.floor(score)}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30);
-
-        ctx.fillStyle = "#aaaaaa";
-        ctx.font = "16px monospace";
-        ctx.fillText("Toque na tela ou 'R' para reiniciar", GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
-        
-        ctx.textAlign = "left";
+    // NOVO: Desenha a tela de Vitória ou Game Over
+    if (gameState === "GAMEOVER" || gameState === "WIN") {
+        // Chama a tela passando a mensagem e confirmando se foi vitória ou não
+        drawGameOverScreen(ctx, score, supportMessage, gameState === "WIN");
     }
 }
 
