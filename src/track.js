@@ -1,5 +1,4 @@
 export class Track {
-
     constructor(canvas) {
         this.canvas = canvas;
         this.offset = 0;
@@ -17,15 +16,20 @@ export class Track {
         if (this.offset >= this.canvas.height) this.offset -= this.canvas.height; 
 
         this.spawnTimer--;
-        if (this.spawnTimer <= 0) {
-            this.spawnEnemies(level);
-            // DIFICULDADE: Timer diminui mais rápido (mínimo de 20ms)
-            this.spawnTimer = Math.max(20, 100 - (level * 12) - (player.speed * 0.15));
+        
+        // DIFICULDADE: Limite de inimigos na tela sobe conforme o nível
+        let maxEnemies = Math.min(5, 1 + Math.floor(level / 2));
+
+        if (this.spawnTimer <= 0 && this.enemies.length < maxEnemies) {
+            this.spawnEnemies(player, level);
+            // Spawn fica mais frequente em níveis altos
+            this.spawnTimer = Math.max(30, 100 - (level * 8));
         }
 
         for (const e of this.enemies) {
-            // DIFICULDADE: Velocidade de queda base mais agressiva
-            e.y += e.baseSpeed + visualSpeed;
+            let enemyVisualSpeed = e.speed * 0.05;
+            // Efeito clássico: movimento relativo à velocidade do player
+            e.y += (visualSpeed - enemyVisualSpeed);
 
             if (
                 player.x - 26 < e.x + 26 &&
@@ -36,34 +40,44 @@ export class Track {
                 player.crashed = true;
             }
         }
-        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 150);
+        // Limpeza com margem para permitir ultrapassagens por trás
+        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 350 && e.y > -350);
     }
 
-    spawnEnemies(level) {
-        // DIFICULDADE: Aumenta a chance de virem 3 carros a partir do Nível 3
-        let maxCars = 1 + Math.floor(Math.random() * (level / 2 + 1));
-        if (maxCars > 3) maxCars = 3;
+    spawnEnemies(player, level) {
+        let attempts = 0;
+        let safe = false;
+        let spawnX = 0;
 
-        let availableLanes = [0, 1, 2, 3];
-        availableLanes.sort(() => Math.random() - 0.5); 
-        let chosenLanes = availableLanes.slice(0, maxCars);
+        // Inimigos ficam mais velozes com o passar dos níveis
+        let baseSpeed = 120 + (level * 15);
+        let enemySpeed = baseSpeed + Math.random() * 60;
 
-        // DIFICULDADE: Velocidade base de queda escala com 1.5x o nível
-        let fallSpeed = 6 + (level * 1.5);
+        // Se o inimigo for mais rápido que você, ele "surge" de trás (fundo da tela)
+        let spawnY = (enemySpeed > player.speed) ? this.canvas.height + 300 : -300;
 
-        let ySpread = 0;
-        for (let lane of chosenLanes) {
-            let spawnX = this.roadLeft + (this.laneWidth * lane) + (this.laneWidth / 2);
-            // Reduzido espalhamento vertical para os carros virem mais próximos
-            let randomY = -150 - ySpread - (Math.random() * 40);
+        while (attempts < 12 && !safe) {
+            let lane = Math.floor(Math.random() * this.lanesCount);
+            spawnX = this.roadLeft + (this.laneWidth * lane) + (this.laneWidth / 2);
             
+            safe = true;
+            for (let e of this.enemies) {
+                // Impede que nasçam colados na mesma faixa
+                if (Math.abs(e.x - spawnX) < 10 && Math.abs(e.y - spawnY) < 400) {
+                    safe = false;
+                    break;
+                }
+            }
+            attempts++;
+        }
+
+        if (safe) {
             this.enemies.push({
                 x: spawnX,
-                y: randomY, 
-                baseSpeed: fallSpeed, 
+                y: spawnY, 
+                speed: enemySpeed,
                 spriteType: Math.random() > 0.5 ? 0 : 1 
             });
-            ySpread += 90 + Math.random() * 50;
         }
     }
 }
