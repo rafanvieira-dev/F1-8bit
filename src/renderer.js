@@ -1,4 +1,3 @@
-// Carregando apenas as imagens dos carros
 const spritePlayer = new Image();
 spritePlayer.src = './assets/player.png';
 
@@ -10,7 +9,7 @@ spriteEnemy2.src = './assets/enemy2.png';
 
 const enemySprites = [spriteEnemy1, spriteEnemy2];
 
-// ================= PISTA (Desenhada por código) =================
+// ================= PISTA =================
 export function drawTrack(ctx, track) {
     ctx.fillStyle = "#3a3a3a";
     ctx.fillRect(track.roadLeft, 0, track.roadWidth, 640);
@@ -44,7 +43,6 @@ export function drawHUD(ctx, time, speed) {
 }
 
 // ================= CARROS =================
-// Fallback: mantém o desenho antigo caso a imagem falhe ou demore a carregar
 function drawF1(ctx, x, y, main, second, visor) {
     ctx.fillStyle = second;
     ctx.fillRect(x - 18, y - 6, 36, 4);
@@ -62,7 +60,8 @@ function drawF1(ctx, x, y, main, second, visor) {
 
 export function drawCar(ctx, p) {
     if (spritePlayer.complete && spritePlayer.naturalWidth !== 0) {
-        ctx.drawImage(spritePlayer, p.x - 20, p.y - 30, 40, 60);
+        // Carro do jogador aumentado para 60x90
+        ctx.drawImage(spritePlayer, p.x - 30, p.y - 45, 60, 90);
     } else {
         drawF1(ctx, p.x, p.y, "#ffffff", "#e10600", "#00d0ff");
     }
@@ -73,7 +72,8 @@ export function drawEnemies(ctx, track) {
         let sprite = (Math.floor(e.x) % 2 === 0) ? enemySprites[0] : enemySprites[1];
 
         if (sprite.complete && sprite.naturalWidth !== 0) {
-            ctx.drawImage(sprite, e.x - 20, e.y - 30, 40, 60);
+            // Carros inimigos do mesmo tamanho: 60x90
+            ctx.drawImage(sprite, e.x - 30, e.y - 45, 60, 90);
         } else {
             drawF1(ctx, e.x, e.y, "#0033cc", "#ffd400", "#00d0ff");
         }
