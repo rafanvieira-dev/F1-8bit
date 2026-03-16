@@ -3,13 +3,12 @@ export class Player {
         this.track = track;
         this.x = track.roadLeft + (track.roadWidth / 2);
         
-        // Limites de câmera para dar a sensação do carro indo e voltando
         this.yBottom = track.canvas.height - 120; 
         this.yTop = track.canvas.height / 2.2;    
         this.y = this.yBottom; 
         
         this.speed = 0;
-        this.maxSpeed = 250; // Começa a 250 km/h
+        this.maxSpeed = 250; 
         this.accel = 1.5;
         this.braking = 3.0;
         this.friction = 0.5;
@@ -17,11 +16,11 @@ export class Player {
         this.crashed = false;
     }
 
-    update(input, level) {
-        // NOVO: A velocidade máxima sobe com o nível, até o limite de 350 km/h no nível 100
+    update(input, level, isMobile) {
         this.maxSpeed = Math.min(350, 250 + level);
 
-        if (input.up) {
+        // NOVO: Se isMobile for verdadeiro, ele ignora os inputs de aceleração e acelera sozinho automaticamente
+        if (input.up || isMobile) {
             this.speed += this.accel;
         } else if (input.down) {
             this.speed -= this.braking;
@@ -55,7 +54,6 @@ export class Player {
         
         if (this.speed < 0) this.speed = 0;
 
-        // Efeito de câmera acelerando o carro pro meio da tela
         const targetY = this.yBottom - (speedFactor * (this.yBottom - this.yTop));
         this.y += (targetY - this.y) * 0.05;
     }
