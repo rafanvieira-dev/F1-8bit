@@ -1,7 +1,7 @@
 import { input } from "./input.js";
 import { Player } from "./player.js";
 import { Track } from "./track.js";
-import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen, drawGameOverScreen } from "./renderer.js";
+import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen } from "./renderer.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -27,23 +27,10 @@ window.addEventListener("resize", resize);
 const track = new Track(canvas);
 const player = new Player(track);
 
-let gameState = "START"; 
+let gameState = "START";
 let score = 0;
 let level = 1;
 let paused = false;
-let supportMessage = "";
-
-// Lista de mensagens de apoio aleatórias
-const messages = [
-    "Boa pilotagem!",
-    "Continue assim!",
-    "Você pode melhorar!",
-    "Quase lá! Tente de novo.",
-    "Mantenha o foco!",
-    "Grande pilotagem, campeão!",
-    "Acelere com sabedoria!",
-    "Cada erro é uma lição."
-];
 
 document.addEventListener("keydown", (e) => {
     if (e.key === "p" && gameState === "PLAYING") paused = !paused;
@@ -56,13 +43,16 @@ canvas.addEventListener("touchstart", () => {
 
 function update() {
     if (gameState === "START") {
-        if (input.up || input.touch) gameState = "PLAYING";
+        if (input.up || input.touch) {
+            gameState = "PLAYING";
+        }
         return;
     }
 
     if (gameState === "GAMEOVER" || paused) return;
 
-    player.update(input);
+    // CORREÇÃO: Passar o 'level' para o player atualizar a velocidade máxima
+    player.update(input, level);
     track.update(player, level);
 
     score += player.speed * 0.015;
@@ -70,8 +60,6 @@ function update() {
 
     if (player.crashed) {
         gameState = "GAMEOVER";
-        // Escolhe uma mensagem aleatória ao bater
-        supportMessage = messages[Math.floor(Math.random() * messages.length)];
     }
 }
 
@@ -89,8 +77,19 @@ function render() {
     drawHUD(ctx, score, level, Math.floor(player.speed));
 
     if (gameState === "GAMEOVER") {
-        // Chama a nova tela de Game Over com o mentor e a mensagem
-        drawGameOverScreen(ctx, score, supportMessage);
+        ctx.fillStyle = "rgba(0,0,0,0.85)";
+        ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.font = "bold 36px monospace";
+        ctx.fillText("GAME OVER", GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20);
+        ctx.fillStyle = "#ffd400";
+        ctx.font = "bold 24px monospace";
+        ctx.fillText(`PONTOS: ${Math.floor(score)}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30);
+        ctx.fillStyle = "#aaaaaa";
+        ctx.font = "16px monospace";
+        ctx.fillText("Toque na tela ou 'R' para reiniciar", GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
+        ctx.textAlign = "left";
     }
 }
 
