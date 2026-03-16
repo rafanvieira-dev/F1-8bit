@@ -14,7 +14,6 @@ export function drawTrack(ctx, track) {
     ctx.fillStyle = "#3a3a3a";
     ctx.fillRect(track.roadLeft, 0, track.roadWidth, 640);
 
-    /* bordas */
     for (let y = track.offset % 40; y < 640; y += 40) {
         ctx.fillStyle = "#ff0000";
         ctx.fillRect(track.roadLeft, y, 10, 20);
@@ -25,7 +24,6 @@ export function drawTrack(ctx, track) {
         ctx.fillRect(track.roadLeft + track.roadWidth - 10, y + 20, 10, 20);
     }
 
-    /* divisórias */
     ctx.fillStyle = "#ffffff";
     for (let i = 1; i < track.lanesCount; i++) {
         const x = track.roadLeft + track.laneWidth * i;
@@ -34,12 +32,72 @@ export function drawTrack(ctx, track) {
     }
 }
 
-// ================= HUD =================
-export function drawHUD(ctx, time, speed) {
-    ctx.fillStyle = "white";
-    ctx.font = "12px monospace";
-    ctx.fillText(`Tempo: ${time}s`, 10, 20);
-    ctx.fillText(`Vel: ${speed} kmh`, 10, 40);
+// ================= TELA INICIAL =================
+export function drawStartScreen(ctx) {
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.fillStyle = "#e10600";
+    ctx.font = "bold 70px monospace";
+    ctx.fillText("F1", w / 2, h * 0.3);
+    
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 50px monospace";
+    ctx.fillText("8-BIT", w / 2, h * 0.4);
+
+    ctx.fillStyle = "#aaaaaa";
+    ctx.font = "18px monospace";
+    ctx.fillText("CONTROLES", w / 2, h * 0.55);
+    
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "14px monospace";
+    ctx.fillText("PC: Setas (Virar e Acelerar)", w / 2, h * 0.60);
+    ctx.fillText("MOBILE: Toque nos lados da tela", w / 2, h * 0.64);
+
+    // Texto piscando baseado nos milissegundos
+    if (Math.floor(Date.now() / 600) % 2 === 0) {
+        ctx.fillStyle = "#ffd400";
+        ctx.font = "bold 16px monospace";
+        ctx.fillText("ACELERE PARA INICIAR", w / 2, h * 0.85);
+    }
+    
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+}
+
+// ================= HUD REFORMULADO =================
+export function drawHUD(ctx, score, level, speed) {
+    // Barra de fundo preta translúcida
+    ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+    ctx.fillRect(0, 0, ctx.canvas.width, 45);
+
+    ctx.font = "bold 16px monospace";
+    ctx.textBaseline = "middle";
+
+    // PONTOS (Esquerda)
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#ffd400";
+    ctx.fillText(`PTS: ${Math.floor(score)}`, 15, 22.5);
+
+    // LEVEL (Centro)
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#00d0ff";
+    ctx.fillText(`LEVEL: ${level}`, ctx.canvas.width / 2, 22.5);
+
+    // VELOCIDADE (Direita) - Muda de cor se estiver em alta velocidade
+    ctx.textAlign = "right";
+    ctx.fillStyle = speed >= 210 ? "#ff4444" : "#00ff00"; 
+    ctx.fillText(`${speed} KM/H`, ctx.canvas.width - 15, 22.5);
+
+    // Resetando estados do canvas
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
 }
 
 // ================= CARROS =================
@@ -60,7 +118,6 @@ function drawF1(ctx, x, y, main, second, visor) {
 
 export function drawCar(ctx, p) {
     if (spritePlayer.complete && spritePlayer.naturalWidth !== 0) {
-        // Player: 60 de largura, 100 de altura (centralizado em -30 e -50)
         ctx.drawImage(spritePlayer, p.x - 30, p.y - 50, 60, 100);
     } else {
         drawF1(ctx, p.x, p.y, "#ffffff", "#e10600", "#00d0ff");
@@ -72,7 +129,6 @@ export function drawEnemies(ctx, track) {
         let sprite = (Math.floor(e.x) % 2 === 0) ? enemySprites[0] : enemySprites[1];
 
         if (sprite.complete && sprite.naturalWidth !== 0) {
-            // Inimigos: Exatamente o mesmo tamanho e centralização do Player (60x100)
             ctx.drawImage(sprite, e.x - 30, e.y - 50, 60, 100);
         } else {
             drawF1(ctx, e.x, e.y, "#0033cc", "#ffd400", "#00d0ff");
