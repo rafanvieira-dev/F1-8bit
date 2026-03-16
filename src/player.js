@@ -34,7 +34,7 @@ export class Player {
             this.x += this.turnSpeed * (speedFactor + 0.4);
         }
 
-        // Limites físicos reajustados para comportar o carro 60x90
+        // Limites alinhados com a metade da largura do carro (30px)
         const leftEdge = this.track.roadLeft + 30;
         const rightEdge = this.track.roadLeft + this.track.roadWidth - 30;
 
