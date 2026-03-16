@@ -125,9 +125,11 @@ export function drawCar(ctx, p) {
     }
 }
 
+// ================= CARROS INIMIGOS =================
 export function drawEnemies(ctx, track) {
     for (const e of track.enemies) {
-        let sprite = (Math.floor(e.x) % 2 === 0) ? enemySprites[0] : enemySprites[1];
+        // Agora o renderizador lê a propriedade spriteType sorteada lá no track.js
+        let sprite = (e.spriteType === 0) ? enemySprites[0] : enemySprites[1];
 
         if (sprite.complete && sprite.naturalWidth !== 0) {
             ctx.drawImage(sprite, e.x - 30, e.y - 50, 60, 100);
