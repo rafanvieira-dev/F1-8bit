@@ -1,13 +1,13 @@
 import { input } from "./input.js";
 import { Player } from "./player.js";
 import { Track } from "./track.js";
-// NOVO: Adicionado import da drawGameOverScreen
 import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen, drawGameOverScreen } from "./renderer.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 const isDesktop = window.innerWidth > window.innerHeight;
+const isMobile = !isDesktop; // NOVO: Detecção para o modo Mobile
 const GAME_WIDTH = isDesktop ? 720 : 360;
 const GAME_HEIGHT = isDesktop ? 900 : 640;
 let scale = 1;
@@ -33,16 +33,15 @@ let score = 0;
 let level = 1;
 let paused = false;
 
-// NOVO: Variáveis do Mentor
 let supportMessage = "";
 const tips = [
-    "Dica: Solte o acelerador para desviar melhor.",
-    "Boa pilotagem! Treine antecipar os movimentos.",
-    "Atenção aos carros rápidos que vêm de trás!",
+    "Dica: Antecipe os seus movimentos.",
+    "Boa pilotagem! Treine seus reflexos.",
+    isMobile ? "Aceleração Automática ativada! Foco na direção." : "Atenção aos carros rápidos que vêm de trás!",
     "Continue assim! Seus reflexos estão ótimos.",
-    "Frear também faz parte de uma boa pilotagem.",
+    "Cada erro é uma lição na F1.",
     "Você tem talento! Só precisa de mais pista.",
-    "Quase lá! Cada erro é uma lição na F1."
+    "O carro está perfeito, acredite no seu tempo de reação."
 ];
 
 document.addEventListener("keydown", (e) => {
@@ -56,6 +55,7 @@ canvas.addEventListener("touchstart", () => {
 
 function update() {
     if (gameState === "START") {
+        // Tocar na tela ou pressionar para cima inicia o jogo
         if (input.up || input.touch) {
             gameState = "PLAYING";
         }
@@ -64,14 +64,13 @@ function update() {
 
     if (gameState === "GAMEOVER" || gameState === "WIN" || paused) return;
 
-    // Passamos o level para o player saber a hora de aumentar a velocidade máxima
-    player.update(input, level);
-    track.update(player, level);
+    // NOVO: Passando isMobile para alterar o comportamento
+    player.update(input, level, isMobile);
+    track.update(player, level, isMobile);
 
     score += player.speed * 0.015;
     level = Math.floor(score / 500) + 1;
 
-    // NOVO: Verifica condição de Vitória ou Derrota
     if (level >= 100) {
         gameState = "WIN";
         supportMessage = "Parabéns! Sua pilotagem foi impecável. Você ganhou a corrida!";
@@ -95,9 +94,7 @@ function render() {
     drawCar(ctx, player);
     drawHUD(ctx, score, level, Math.floor(player.speed));
 
-    // NOVO: Desenha a tela de Vitória ou Game Over
     if (gameState === "GAMEOVER" || gameState === "WIN") {
-        // Chama a tela passando a mensagem e confirmando se foi vitória ou não
         drawGameOverScreen(ctx, score, supportMessage, gameState === "WIN");
     }
 }
