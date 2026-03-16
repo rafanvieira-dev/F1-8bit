@@ -17,20 +17,39 @@ export class Track {
         let visualSpeed = player.speed * 0.05; 
         
         this.offset += visualSpeed;
-        
-        // MUDANÇA: Reset do fundo usando o tamanho total da tela da imagem
         if (this.offset >= this.canvas.height) {
             this.offset -= this.canvas.height; 
         }
 
-        // Calcula a dificuldade a cada 5 levels (Tiers de dificuldade)
         let difficultyTier = Math.floor((level - 1) / 5);
 
         this.spawnTimer--;
         if (this.spawnTimer <= 0) {
             this.spawnEnemies(player, difficultyTier);
-            // Timer diminui conforme o Tier de dificuldade aumenta
             this.spawnTimer = Math.max(25, 90 - (player.speed * 0.15) - (difficultyTier * 5));
+        }
+
+        // ========================================================
+        // NOVO: SISTEMA ANTI-ENGAVETAMENTO DE INIMIGOS
+        // ========================================================
+        for (let i = 0; i < this.enemies.length; i++) {
+            let e1 = this.enemies[i];
+            for (let j = 0; j < this.enemies.length; j++) {
+                if (i === j) continue;
+                let e2 = this.enemies[j];
+                
+                // Se os carros estão na mesma faixa (X igual)
+                if (Math.abs(e1.x - e2.x) < 10) {
+                    // Se o carro 1 está ATRÁS do carro 2 (y maior = mais abaixo na tela)
+                    // e a distância entre eles é perigosa (menor que 150 pixels)
+                    if (e1.y > e2.y && e1.y - e2.y < 150) {
+                        // O carro de trás (e1) é forçado a frear para não atravessar o da frente
+                        if (e1.speed > e2.speed) {
+                            e1.speed = e2.speed;
+                        }
+                    }
+                }
+            }
         }
 
         for (const e of this.enemies) {
@@ -47,7 +66,6 @@ export class Track {
             }
         }
 
-        // Limpeza dos inimigos muito longe da tela para evitar sobrecarga de memória e sumiço de sprites
         this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 350 && e.y > -350);
     }
 
@@ -56,16 +74,13 @@ export class Track {
         let safe = false;
         let spawnX = 0;
 
-        // Velocidade base que aumenta a cada Tier de dificuldade
         let baseEnemySpeed = 100 + (difficultyTier * 15);
         let enemySpeed = baseEnemySpeed + Math.random() * 50; 
 
-        // Chance de um inimigo extremamente rápido (Apressadinho) que te ultrapassa (chance aumenta com o Tier)
         if (Math.random() < 0.15 + (difficultyTier * 0.05)) {
-            enemySpeed = 240 + Math.random() * 30; // Mais rápido que o Max Speed (230)
+            enemySpeed = 240 + Math.random() * 30; 
         }
 
-        // Se o inimigo for mais rápido que você, ele nasce lá atrás para ultrapassar
         let spawnY = (enemySpeed > player.speed) ? this.canvas.height + 250 : -250;
 
         while (attempts < 15 && !safe) {
@@ -74,10 +89,12 @@ export class Track {
             
             safe = true;
             for (let e of this.enemies) {
-                // Checa a distância X para garantir que não caiam na mesma faixa muito próximos
                 if (Math.abs(e.x - spawnX) < 10) {
-                    if (spawnY === -250 && e.y < this.canvas.height / 2) safe = false;
-                    if (spawnY > 0 && e.y > this.canvas.height / 2) safe = false;
+                    // NOVO: Raio de segurança de 300 pixels para nascimento (Spawn)
+                    // Garante que ninguém nasça "montado" em cima de outro carro!
+                    if (Math.abs(e.y - spawnY) < 300) {
+                        safe = false;
+                    }
                 }
             }
             attempts++;
@@ -88,7 +105,7 @@ export class Track {
                 x: spawnX,
                 y: spawnY, 
                 speed: enemySpeed,
-                spriteType: Math.random() > 0.5 ? 0 : 1 // Sorteia cor do sprite 50/50
+                spriteType: Math.random() > 0.5 ? 0 : 1 
             });
         }
     }
