@@ -2,12 +2,11 @@ export class Player {
     constructor(track) {
         this.track = track;
         this.x = track.roadLeft + (track.roadWidth / 2);
-        this.yBottom = track.canvas.height - 120; 
-        this.yTop = track.canvas.height / 2.2;    
-        this.y = this.yBottom; 
-        
+        this.yBottom = track.canvas.height - 120;
+        this.yTop = track.canvas.height / 2.2;
+        this.y = this.yBottom;
         this.speed = 0;
-        this.maxSpeed = 250; 
+        this.maxSpeed = 250;
         this.accel = 1.6;
         this.braking = 3.5;
         this.friction = 0.5;
@@ -16,7 +15,6 @@ export class Player {
     }
 
     update(input, level) {
-        // Velocidade aumenta 10km/h por nível até 350km/h
         this.maxSpeed = Math.min(350, 250 + (level - 1) * 10);
 
         if (input.up) {
@@ -24,15 +22,15 @@ export class Player {
         } else if (input.down) {
             this.speed -= this.braking;
         } else {
-            this.speed -= this.friction; 
+            this.speed -= this.friction;
         }
 
         if (this.speed < 0) this.speed = 0;
         if (this.speed > this.maxSpeed) this.speed = this.maxSpeed;
 
-        let speedFactor = this.speed / this.maxSpeed; 
+        let speedFactor = this.speed / this.maxSpeed;
         
-        if (input.left && this.speed > 0) this.x -= this.turnSpeed * (speedFactor + 0.4); 
+        if (input.left && this.speed > 0) this.x -= this.turnSpeed * (speedFactor + 0.4);
         if (input.right && this.speed > 0) this.x += this.turnSpeed * (speedFactor + 0.4);
 
         const leftEdge = this.track.roadLeft + 30;
