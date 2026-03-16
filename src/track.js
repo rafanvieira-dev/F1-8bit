@@ -17,22 +17,26 @@ export class Track {
         let visualSpeed = player.speed * 0.05; 
         
         this.offset += visualSpeed;
-        if (this.offset > 60) this.offset -= 60; 
+        
+        // MUDANÇA: Reset do fundo usando o tamanho total da tela da imagem
+        if (this.offset >= this.canvas.height) {
+            this.offset -= this.canvas.height; 
+        }
+
+        // Calcula a dificuldade a cada 5 levels (Tiers de dificuldade)
+        let difficultyTier = Math.floor((level - 1) / 5);
 
         this.spawnTimer--;
         if (this.spawnTimer <= 0) {
-            this.spawnEnemies(player, level); // Passamos o player para o inimigo saber a velocidade
-            // Ritmo de spawn de carros mais constante
-            this.spawnTimer = Math.max(20, 80 - (level * 3));
+            this.spawnEnemies(player, difficultyTier);
+            // Timer diminui conforme o Tier de dificuldade aumenta
+            this.spawnTimer = Math.max(25, 90 - (player.speed * 0.15) - (difficultyTier * 5));
         }
 
         for (const e of this.enemies) {
             let enemyVisualSpeed = e.speed * 0.05;
-            
-            // O carro inimigo sobe ou desce dependendo de quem é mais rápido
             e.y += (visualSpeed - enemyVisualSpeed);
 
-            // Hitbox
             if (
                 player.x - 26 < e.x + 26 &&
                 player.x + 26 > e.x - 26 &&
@@ -43,34 +47,36 @@ export class Track {
             }
         }
 
-        // CORREÇÃO: Limites aumentados para 250 pixels fora da tela para carros que vêm de trás não serem deletados!
-        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 250 && e.y > -250);
+        // Limpeza dos inimigos muito longe da tela para evitar sobrecarga de memória e sumiço de sprites
+        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 350 && e.y > -350);
     }
 
-    spawnEnemies(player, level) {
+    spawnEnemies(player, difficultyTier) {
         let attempts = 0;
         let safe = false;
         let spawnX = 0;
-        
-        // Define a velocidade do inimigo (Aumenta com o level, máxima de 210)
-        let enemySpeed = Math.min(210, 100 + (level * 5) + Math.random() * 30);
-        
-        // A MÁGICA DA VELOCIDADE:
-        // Se o inimigo é mais rápido que você, ele nasce ATRÁS (canvas.height + 200) para te ultrapassar.
-        // Se é mais lento, nasce na FRENTE (-200) para você ultrapassar.
-        let spawnY = (enemySpeed > player.speed) ? this.canvas.height + 200 : -200;
 
-        // Tenta achar uma faixa vazia
-        while (attempts < 10 && !safe) {
+        // Velocidade base que aumenta a cada Tier de dificuldade
+        let baseEnemySpeed = 100 + (difficultyTier * 15);
+        let enemySpeed = baseEnemySpeed + Math.random() * 50; 
+
+        // Chance de um inimigo extremamente rápido (Apressadinho) que te ultrapassa (chance aumenta com o Tier)
+        if (Math.random() < 0.15 + (difficultyTier * 0.05)) {
+            enemySpeed = 240 + Math.random() * 30; // Mais rápido que o Max Speed (230)
+        }
+
+        // Se o inimigo for mais rápido que você, ele nasce lá atrás para ultrapassar
+        let spawnY = (enemySpeed > player.speed) ? this.canvas.height + 250 : -250;
+
+        while (attempts < 15 && !safe) {
             let lane = Math.floor(Math.random() * this.lanesCount);
             spawnX = this.roadLeft + (this.laneWidth * lane) + (this.laneWidth / 2);
             
             safe = true;
             for (let e of this.enemies) {
+                // Checa a distância X para garantir que não caiam na mesma faixa muito próximos
                 if (Math.abs(e.x - spawnX) < 10) {
-                    // Se o inimigo vai nascer na frente, garante que a pista não tá entupida lá na frente
-                    if (spawnY === -200 && e.y < this.canvas.height / 2) safe = false;
-                    // Se o inimigo vai nascer atrás, garante que a pista não tá entupida lá atrás
+                    if (spawnY === -250 && e.y < this.canvas.height / 2) safe = false;
                     if (spawnY > 0 && e.y > this.canvas.height / 2) safe = false;
                 }
             }
@@ -82,8 +88,7 @@ export class Track {
                 x: spawnX,
                 y: spawnY, 
                 speed: enemySpeed,
-                // CORREÇÃO DAS CORES: Sorteio real de 50/50 em vez de usar a posição X
-                spriteType: Math.random() > 0.5 ? 0 : 1 
+                spriteType: Math.random() > 0.5 ? 0 : 1 // Sorteia cor do sprite 50/50
             });
         }
     }
