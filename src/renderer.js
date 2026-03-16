@@ -11,6 +11,41 @@ spriteEnemy2.src = './assets/enemy2.png';
 // Array para sortear os inimigos
 const enemySprites = [spriteEnemy1, spriteEnemy2];
 
+// ================= PISTA =================
+export function drawTrack(ctx, track) {
+    ctx.fillStyle = "#3a3a3a";
+    ctx.fillRect(track.roadLeft, 0, track.roadWidth, 640);
+
+    /* bordas */
+    for (let y = track.offset % 40; y < 640; y += 40) {
+        ctx.fillStyle = "#ff0000";
+        ctx.fillRect(track.roadLeft, y, 10, 20);
+        ctx.fillRect(track.roadLeft + track.roadWidth - 10, y, 20);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(track.roadLeft, y + 20, 10, 20);
+        ctx.fillRect(track.roadLeft + track.roadWidth - 10, y + 20, 10, 20);
+    }
+
+    /* divisórias */
+    ctx.fillStyle = "#ffffff";
+    for (let i = 1; i < track.lanesCount; i++) {
+        const x = track.roadLeft + track.laneWidth * i;
+        for (let y = track.offset % 60; y < 640; y += 60)
+            ctx.fillRect(x - 2, y, 4, 30);
+    }
+}
+
+// ================= HUD =================
+export function drawHUD(ctx, time, speed) {
+    ctx.fillStyle = "white";
+    ctx.font = "12px monospace";
+    ctx.fillText(`Tempo: ${time}s`, 10, 20);
+    ctx.fillText(`Vel: ${speed} kmh`, 10, 40);
+}
+
+
+// ================= CARROS =================
 // Fallback: mantém o desenho antigo caso a imagem falhe ou demore a carregar
 function drawF1(ctx, x, y, main, second, visor) {
     ctx.fillStyle = second;
@@ -39,7 +74,6 @@ export function drawCar(ctx, p) {
 export function drawEnemies(ctx, track) {
     for (const e of track.enemies) {
         // Escolhe o spriteEnemy1 ou spriteEnemy2 baseado na posição X do inimigo 
-        // (uma gambiarra simples para eles variarem sem precisarmos mexer no track.js)
         let sprite = (Math.floor(e.x) % 2 === 0) ? enemySprites[0] : enemySprites[1];
 
         if (sprite.complete && sprite.naturalWidth !== 0) {
