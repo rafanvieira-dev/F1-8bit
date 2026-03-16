@@ -13,7 +13,7 @@ export class Track {
         this.spawnTimer = 0;
     }
 
-    update(player, level) {
+    update(player, level, isMobile) {
         let visualSpeed = player.speed * 0.05; 
         
         this.offset += visualSpeed;
@@ -23,14 +23,10 @@ export class Track {
 
         this.spawnTimer--;
         if (this.spawnTimer <= 0) {
-            this.spawnEnemies(player, level);
-            // NOVO: Fica mais frenético muito mais rápido! O limite inferior é 20.
+            this.spawnEnemies(player, level, isMobile);
             this.spawnTimer = Math.max(20, 90 - (player.speed * 0.15) - (level * 1.2));
         }
 
-        // ========================================================
-        // SISTEMA ANTI-ENGAVETAMENTO MANTIDO INTÁCTO
-        // ========================================================
         for (let i = 0; i < this.enemies.length; i++) {
             let e1 = this.enemies[i];
             for (let j = 0; j < this.enemies.length; j++) {
@@ -64,18 +60,23 @@ export class Track {
         this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 350 && e.y > -350);
     }
 
-    spawnEnemies(player, level) {
+    spawnEnemies(player, level, isMobile) {
         let attempts = 0;
         let safe = false;
         let spawnX = 0;
 
-        // NOVO: Dificuldade escalona duramente! Adiciona velocidade bônus baseada no nível.
         let baseEnemySpeed = 100 + (level * 2.5);
         let enemySpeed = baseEnemySpeed + Math.random() * 50; 
 
-        // NOVO: Carros que te ultrapassam agressivamente vêm com mais frequência
-        if (Math.random() < 0.15 + (level * 0.005)) {
+        // NOVO: Apenas permite carros apressadinhos se NÃO for mobile
+        if (!isMobile && Math.random() < 0.15 + (level * 0.005)) {
             enemySpeed = 240 + (level * 1.5) + Math.random() * 30; 
+        }
+
+        // NOVO: No Mobile, todos os carros são restritos para andarem mais devagar que o jogador. 
+        // Com isso, é matematicamente impossível eles virem por trás da tela. Eles sempre cairão de frente.
+        if (isMobile) {
+            enemySpeed = Math.min(enemySpeed, Math.max(50, player.speed - 20));
         }
 
         let spawnY = (enemySpeed > player.speed) ? this.canvas.height + 250 : -250;
