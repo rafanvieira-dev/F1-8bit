@@ -4,8 +4,8 @@ export class Track {
         this.canvas = canvas;
         this.offset = 0;
         
-        // Pista alargada para 75% da largura da tela
-        this.roadWidth = canvas.width * 0.75;
+        // Pista com 70% da tela, ideal para carros 60x100
+        this.roadWidth = canvas.width * 0.70;
         this.roadLeft = (canvas.width - this.roadWidth) / 2;
         
         this.lanesCount = 4;
@@ -30,22 +30,21 @@ export class Track {
             let enemyVisualSpeed = e.speed * 0.05;
             e.y += (visualSpeed - enemyVisualSpeed);
 
-            // Colisão ampliada para o carro de 60x90 (Margem de segurança de ~25px na largura e ~40px na altura)
+            // Hitbox exata para o carro 60x100 (Raio X: 26, Raio Y: 46)
             if (
-                player.x - 25 < e.x + 25 &&
-                player.x + 25 > e.x - 25 &&
-                player.y - 40 < e.y + 40 &&
-                player.y + 40 > e.y - 40
+                player.x - 26 < e.x + 26 &&
+                player.x + 26 > e.x - 26 &&
+                player.y - 46 < e.y + 46 &&
+                player.y + 46 > e.y - 46
             ) {
                 player.crashed = true;
             }
         }
 
-        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 80 && e.y > -200);
+        this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 150 && e.y > -200);
     }
 
     spawnEnemies() {
-        // Margem maior (padding) para evitar que o carro maior nasça cortado na zebra
         const padding = 35;
         const minX = this.roadLeft + padding;
         const maxX = this.roadLeft + this.roadWidth - padding;
@@ -53,7 +52,7 @@ export class Track {
 
         this.enemies.push({
             x: randomX,
-            y: -100, // Nascem um pouco mais acima na tela
+            y: -120, 
             speed: 100 + Math.random() * 60 
         });
     }
