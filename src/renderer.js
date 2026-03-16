@@ -80,7 +80,8 @@ export function drawStartScreen(ctx) {
     ctx.fillStyle = "#ffffff";
     ctx.font = "14px monospace";
     ctx.fillText("PC: Setas (Virar e Acelerar)", w / 2, h * 0.60);
-    ctx.fillText("MOBILE: Toque nos lados", w / 2, h * 0.64);
+    // NOVO: Alerta visual de aceleração automática no mobile
+    ctx.fillText("MOBILE: Toque nos Lados (Auto-Acelera)", w / 2, h * 0.64);
 
     if (Math.floor(Date.now() / 600) % 2 === 0) {
         ctx.fillStyle = "#ffd400";
@@ -91,7 +92,7 @@ export function drawStartScreen(ctx) {
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 }
-
+// ...
 // ================= TELA DE GAME OVER / VITÓRIA COM MENTOR =================
 export function drawGameOverScreen(ctx, score, message, isWin) {
     const w = ctx.canvas.width;
