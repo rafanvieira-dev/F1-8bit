@@ -11,10 +11,16 @@ const enemySprites = [spriteEnemy1, spriteEnemy2];
 
 // ================= PISTA =================
 export function drawTrack(ctx, track) {
-    ctx.fillStyle = "#3a3a3a";
-    ctx.fillRect(track.roadLeft, 0, track.roadWidth, 640);
+    const h = ctx.canvas.height;
+    const w = ctx.canvas.width;
 
-    for (let y = track.offset % 40; y < 640; y += 40) {
+    ctx.fillStyle = "#2d7a2d";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = "#3a3a3a";
+    ctx.fillRect(track.roadLeft, 0, track.roadWidth, h);
+
+    for (let y = track.offset % 40; y < h; y += 40) {
         ctx.fillStyle = "#ff0000";
         ctx.fillRect(track.roadLeft, y, 10, 20);
         ctx.fillRect(track.roadLeft + track.roadWidth - 10, y, 10, 20);
@@ -27,8 +33,9 @@ export function drawTrack(ctx, track) {
     ctx.fillStyle = "#ffffff";
     for (let i = 1; i < track.lanesCount; i++) {
         const x = track.roadLeft + track.laneWidth * i;
-        for (let y = track.offset % 60; y < 640; y += 60)
+        for (let y = track.offset % 60; y < h; y += 60) {
             ctx.fillRect(x - 2, y, 4, 30);
+        }
     }
 }
 
@@ -58,9 +65,8 @@ export function drawStartScreen(ctx) {
     ctx.fillStyle = "#ffffff";
     ctx.font = "14px monospace";
     ctx.fillText("PC: Setas (Virar e Acelerar)", w / 2, h * 0.60);
-    ctx.fillText("MOBILE: Toque nos lados da tela", w / 2, h * 0.64);
+    ctx.fillText("MOBILE: Toque nos lados", w / 2, h * 0.64);
 
-    // Texto piscando baseado nos milissegundos
     if (Math.floor(Date.now() / 600) % 2 === 0) {
         ctx.fillStyle = "#ffd400";
         ctx.font = "bold 16px monospace";
@@ -71,31 +77,26 @@ export function drawStartScreen(ctx) {
     ctx.textBaseline = "alphabetic";
 }
 
-// ================= HUD REFORMULADO =================
+// ================= HUD =================
 export function drawHUD(ctx, score, level, speed) {
-    // Barra de fundo preta translúcida
     ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
     ctx.fillRect(0, 0, ctx.canvas.width, 45);
 
     ctx.font = "bold 16px monospace";
     ctx.textBaseline = "middle";
 
-    // PONTOS (Esquerda)
     ctx.textAlign = "left";
     ctx.fillStyle = "#ffd400";
     ctx.fillText(`PTS: ${Math.floor(score)}`, 15, 22.5);
 
-    // LEVEL (Centro)
     ctx.textAlign = "center";
     ctx.fillStyle = "#00d0ff";
     ctx.fillText(`LEVEL: ${level}`, ctx.canvas.width / 2, 22.5);
 
-    // VELOCIDADE (Direita) - Muda de cor se estiver em alta velocidade
     ctx.textAlign = "right";
     ctx.fillStyle = speed >= 210 ? "#ff4444" : "#00ff00"; 
     ctx.fillText(`${speed} KM/H`, ctx.canvas.width - 15, 22.5);
 
-    // Resetando estados do canvas
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 }
