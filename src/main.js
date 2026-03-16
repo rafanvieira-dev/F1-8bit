@@ -1,7 +1,7 @@
 import { input } from "./input.js";
 import { Player } from "./player.js";
 import { Track } from "./track.js";
-import { drawTrack, drawCar, drawEnemies, drawHUD } from "./renderer.js";
+import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen } from "./renderer.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -27,71 +27,79 @@ window.addEventListener("resize", resize);
 const track = new Track(canvas);
 const player = new Player(track);
 
-let start = Date.now();
-let gameOver = false;
-let record = JSON.parse(localStorage.getItem("f1record"));
-
+// Estados do Jogo: START, PLAYING, GAMEOVER
+let gameState = "START"; 
+let score = 0;
+let level = 1;
 let paused = false;
+
 document.addEventListener("keydown", (e) => {
-    if (e.key === "p") paused = !paused;
+    if (e.key === "p" && gameState === "PLAYING") paused = !paused;
+    if (e.key.toLowerCase() === "r" && gameState === "GAMEOVER") location.reload();
 });
 
-function saveRecord() {
-    const time = ((Date.now() - start) / 1000).toFixed(1);
-    const kmh = Math.floor(player.speed);
-
-    if (!record || kmh > record.kmh) {
-        let name = prompt("NOVO RECORDE! 3 letras:");
-        if (!name) name = "???";
-
-        record = {
-            name: name.substring(0, 3).toUpperCase(),
-            time,
-            kmh
-        };
-
-        localStorage.setItem("f1record", JSON.stringify(record));
-    }
-}
+// Toque na tela para reiniciar após morrer
+canvas.addEventListener("touchstart", () => {
+    if (gameState === "GAMEOVER") location.reload();
+});
 
 function update() {
-    if (gameOver || paused) return;
+    // Tela inicial aguarda você acelerar (Seta para cima ou Toque)
+    if (gameState === "START") {
+        if (input.up || input.touch) {
+            gameState = "PLAYING";
+        }
+        return;
+    }
+
+    if (gameState === "GAMEOVER" || paused) return;
+
     player.update(input);
-    track.update(player);
+    track.update(player, level); // Enviamos o level atual para a pista
+
+    // A pontuação sobe conforme a velocidade que você dirige
+    score += player.speed * 0.015;
+    level = Math.floor(score / 500) + 1; // A cada 500 pontos, sobe 1 level
 
     if (player.crashed) {
-        gameOver = true;
-        saveRecord();
+        gameState = "GAMEOVER";
     }
 }
 
 function render() {
     ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    drawTrack(ctx, track);
+    drawTrack(ctx, track); // Desenha a pista no fundo
+
+    if (gameState === "START") {
+        drawStartScreen(ctx); // Desenha a tela inicial por cima da pista vazia
+        return;
+    }
+
     drawEnemies(ctx, track);
     drawCar(ctx, player);
+    drawHUD(ctx, score, level, Math.floor(player.speed));
 
-    const time = ((Date.now() - start) / 1000).toFixed(1);
-    drawHUD(ctx, time, Math.floor(player.speed));
-
-    if (gameOver) {
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
+    if (gameState === "GAMEOVER") {
+        ctx.fillStyle = "rgba(0,0,0,0.85)";
         ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-        ctx.fillStyle = "white";
-        ctx.font = "28px monospace";
-        ctx.fillText("GAME OVER", GAME_WIDTH / 2 - 90, GAME_HEIGHT / 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.font = "bold 36px monospace";
+        ctx.fillText("GAME OVER", GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20);
 
+        ctx.fillStyle = "#ffd400";
+        ctx.font = "bold 24px monospace";
+        ctx.fillText(`PONTOS: ${Math.floor(score)}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30);
+
+        ctx.fillStyle = "#aaaaaa";
         ctx.font = "16px monospace";
-        ctx.fillText("Pressione R para reiniciar", GAME_WIDTH / 2 - 110, GAME_HEIGHT / 2 + 40);
+        ctx.fillText("Toque na tela ou 'R' para reiniciar", GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
+        
+        ctx.textAlign = "left"; // Reset padrão
     }
 }
-
-document.addEventListener("keydown", (e) => {
-    if (gameOver && e.key.toLowerCase() === "r")
-        location.reload();
-});
 
 function loop() {
     update();
