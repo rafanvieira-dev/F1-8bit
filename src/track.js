@@ -13,7 +13,7 @@ export class Track {
         this.spawnTimer = 0;
     }
 
-    update(player, level) { // Agora recebe o Level atual
+    update(player, level) {
         let visualSpeed = player.speed * 0.05; 
         
         this.offset += visualSpeed;
@@ -22,7 +22,6 @@ export class Track {
         this.spawnTimer--;
         if (this.spawnTimer <= 0) {
             this.spawnEnemies(level);
-            // Quanto maior o level, mais rápido novos carros aparecem
             this.spawnTimer = Math.max(15, 100 - (player.speed * 0.2) - (level * 3));
         }
 
@@ -40,7 +39,6 @@ export class Track {
             }
         }
 
-        // CORREÇÃO: O carro é apagado assim que a ponta traseira dele (y < canvas.height + 60) passa do limite visual inferior da tela.
         this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 60 && e.y > -200);
     }
 
@@ -53,7 +51,6 @@ export class Track {
         this.enemies.push({
             x: randomX,
             y: -150, 
-            // Inimigos ficam progressivamente mais rápidos com o Level
             speed: 100 + Math.random() * (60 + (level * 8)) 
         });
     }
