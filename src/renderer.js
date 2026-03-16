@@ -7,34 +7,45 @@ spriteEnemy1.src = './assets/enemy1.png';
 const spriteEnemy2 = new Image();
 spriteEnemy2.src = './assets/enemy2.png';
 
+// Adicionando a nova pista gerada
+const spriteTrack = new Image();
+spriteTrack.src = './assets/track.png';
+
 const enemySprites = [spriteEnemy1, spriteEnemy2];
 
 // ================= PISTA =================
 export function drawTrack(ctx, track) {
-    const h = ctx.canvas.height;
     const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
 
-    ctx.fillStyle = "#2d7a2d";
-    ctx.fillRect(0, 0, w, h);
+    if (spriteTrack.complete && spriteTrack.naturalWidth !== 0) {
+        // Pista descendo
+        ctx.drawImage(spriteTrack, 0, track.offset, w, h);
+        // Pista "gêmea" grudada em cima para fechar o loop infinito perfeitamente
+        ctx.drawImage(spriteTrack, 0, track.offset - h, w, h);
+    } else {
+        // Fallback caso a imagem não carregue
+        ctx.fillStyle = "#2d7a2d";
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = "#3a3a3a";
+        ctx.fillRect(track.roadLeft, 0, track.roadWidth, h);
 
-    ctx.fillStyle = "#3a3a3a";
-    ctx.fillRect(track.roadLeft, 0, track.roadWidth, h);
+        for (let y = track.offset % 40; y < h + 40; y += 40) {
+            ctx.fillStyle = "#ff0000";
+            ctx.fillRect(track.roadLeft, y, 10, 20);
+            ctx.fillRect(track.roadLeft + track.roadWidth - 10, y, 10, 20);
 
-    for (let y = track.offset % 40; y < h; y += 40) {
-        ctx.fillStyle = "#ff0000";
-        ctx.fillRect(track.roadLeft, y, 10, 20);
-        ctx.fillRect(track.roadLeft + track.roadWidth - 10, y, 10, 20);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(track.roadLeft, y + 20, 10, 20);
+            ctx.fillRect(track.roadLeft + track.roadWidth - 10, y + 20, 10, 20);
+        }
 
         ctx.fillStyle = "#ffffff";
-        ctx.fillRect(track.roadLeft, y + 20, 10, 20);
-        ctx.fillRect(track.roadLeft + track.roadWidth - 10, y + 20, 10, 20);
-    }
-
-    ctx.fillStyle = "#ffffff";
-    for (let i = 1; i < track.lanesCount; i++) {
-        const x = track.roadLeft + track.laneWidth * i;
-        for (let y = track.offset % 60; y < h; y += 60) {
-            ctx.fillRect(x - 2, y, 4, 30);
+        for (let i = 1; i < track.lanesCount; i++) {
+            const x = track.roadLeft + track.laneWidth * i;
+            for (let y = track.offset % 60; y < h + 60; y += 60) {
+                ctx.fillRect(x - 2, y, 4, 30);
+            }
         }
     }
 }
@@ -56,7 +67,7 @@ export function drawStartScreen(ctx) {
     
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 50px monospace";
-    ctx.fillText("32-BIT", w / 2, h * 0.4);
+    ctx.fillText("8-BIT", w / 2, h * 0.4);
 
     ctx.fillStyle = "#aaaaaa";
     ctx.font = "18px monospace";
@@ -125,10 +136,8 @@ export function drawCar(ctx, p) {
     }
 }
 
-// ================= CARROS INIMIGOS =================
 export function drawEnemies(ctx, track) {
     for (const e of track.enemies) {
-        // Agora o renderizador lê a propriedade spriteType sorteada lá no track.js
         let sprite = (e.spriteType === 0) ? enemySprites[0] : enemySprites[1];
 
         if (sprite.complete && sprite.naturalWidth !== 0) {
