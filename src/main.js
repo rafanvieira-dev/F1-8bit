@@ -27,7 +27,6 @@ window.addEventListener("resize", resize);
 const track = new Track(canvas);
 const player = new Player(track);
 
-// Estados do Jogo: START, PLAYING, GAMEOVER
 let gameState = "START"; 
 let score = 0;
 let level = 1;
@@ -38,13 +37,11 @@ document.addEventListener("keydown", (e) => {
     if (e.key.toLowerCase() === "r" && gameState === "GAMEOVER") location.reload();
 });
 
-// Toque na tela para reiniciar após morrer
 canvas.addEventListener("touchstart", () => {
     if (gameState === "GAMEOVER") location.reload();
 });
 
 function update() {
-    // Tela inicial aguarda você acelerar (Seta para cima ou Toque)
     if (gameState === "START") {
         if (input.up || input.touch) {
             gameState = "PLAYING";
@@ -55,11 +52,10 @@ function update() {
     if (gameState === "GAMEOVER" || paused) return;
 
     player.update(input);
-    track.update(player, level); // Enviamos o level atual para a pista
+    track.update(player, level);
 
-    // A pontuação sobe conforme a velocidade que você dirige
     score += player.speed * 0.015;
-    level = Math.floor(score / 500) + 1; // A cada 500 pontos, sobe 1 level
+    level = Math.floor(score / 500) + 1;
 
     if (player.crashed) {
         gameState = "GAMEOVER";
@@ -69,10 +65,10 @@ function update() {
 function render() {
     ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    drawTrack(ctx, track); // Desenha a pista no fundo
+    drawTrack(ctx, track);
 
     if (gameState === "START") {
-        drawStartScreen(ctx); // Desenha a tela inicial por cima da pista vazia
+        drawStartScreen(ctx);
         return;
     }
 
@@ -97,7 +93,7 @@ function render() {
         ctx.font = "16px monospace";
         ctx.fillText("Toque na tela ou 'R' para reiniciar", GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
         
-        ctx.textAlign = "left"; // Reset padrão
+        ctx.textAlign = "left";
     }
 }
 
