@@ -2,7 +2,11 @@ export class Player {
     constructor(track) {
         this.track = track;
         this.x = track.roadLeft + (track.roadWidth / 2);
-        this.y = 560; 
+        
+        // Limites de câmera para dar a sensação do carro indo e voltando
+        this.yBottom = track.canvas.height - 120; 
+        this.yTop = track.canvas.height / 2.2;    
+        this.y = this.yBottom; 
         
         this.speed = 0;
         this.maxSpeed = 230; 
@@ -34,7 +38,6 @@ export class Player {
             this.x += this.turnSpeed * (speedFactor + 0.4);
         }
 
-        // Limites físicos reajustados para comportar o carro 60x90
         const leftEdge = this.track.roadLeft + 30;
         const rightEdge = this.track.roadLeft + this.track.roadWidth - 30;
 
@@ -48,5 +51,9 @@ export class Player {
         }
         
         if (this.speed < 0) this.speed = 0;
+
+        // Efeito de câmera acelerando o carro pro meio da tela
+        const targetY = this.yBottom - (speedFactor * (this.yBottom - this.yTop));
+        this.y += (targetY - this.y) * 0.05;
     }
 }
