@@ -1,7 +1,7 @@
 import { input } from "./input.js";
 import { Player } from "./player.js";
 import { Track } from "./track.js";
-import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen } from "./renderer.js";
+import { drawTrack, drawCar, drawEnemies, drawHUD } from "./renderer.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -27,71 +27,71 @@ window.addEventListener("resize", resize);
 const track = new Track(canvas);
 const player = new Player(track);
 
-let gameState = "START";
-let score = 0;
-let level = 1;
+let start = Date.now();
+let gameOver = false;
+let record = JSON.parse(localStorage.getItem("f1record"));
+
 let paused = false;
-
 document.addEventListener("keydown", (e) => {
-    if (e.key === "p" && gameState === "PLAYING") paused = !paused;
-    if (e.key.toLowerCase() === "r" && gameState === "GAMEOVER") location.reload();
+    if (e.key === "p") paused = !paused;
 });
 
-canvas.addEventListener("touchstart", () => {
-    if (gameState === "GAMEOVER") location.reload();
-});
+function saveRecord() {
+    const time = ((Date.now() - start) / 1000).toFixed(1);
+    const kmh = Math.floor(player.speed);
+
+    if (!record || kmh > record.kmh) {
+        let name = prompt("NOVO RECORDE! 3 letras:");
+        if (!name) name = "???";
+
+        record = {
+            name: name.substring(0, 3).toUpperCase(),
+            time,
+            kmh
+        };
+
+        localStorage.setItem("f1record", JSON.stringify(record));
+    }
+}
 
 function update() {
-    if (gameState === "START") {
-        if (input.up || input.touch) {
-            gameState = "PLAYING";
-        }
-        return;
-    }
-
-    if (gameState === "GAMEOVER" || paused) return;
-
-    // CORREÇÃO: Passar o 'level' para o player atualizar a velocidade máxima
-    player.update(input, level);
-    track.update(player, level);
-
-    score += player.speed * 0.015;
-    level = Math.floor(score / 500) + 1;
+    if (gameOver || paused) return;
+    player.update(input);
+    track.update(player);
 
     if (player.crashed) {
-        gameState = "GAMEOVER";
+        gameOver = true;
+        saveRecord();
     }
 }
 
 function render() {
     ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
     drawTrack(ctx, track);
-
-    if (gameState === "START") {
-        drawStartScreen(ctx);
-        return;
-    }
-
     drawEnemies(ctx, track);
     drawCar(ctx, player);
-    drawHUD(ctx, score, level, Math.floor(player.speed));
 
-    if (gameState === "GAMEOVER") {
-        ctx.fillStyle = "rgba(0,0,0,0.85)";
+    const time = ((Date.now() - start) / 1000).toFixed(1);
+    drawHUD(ctx, time, Math.floor(player.speed));
+
+    if (gameOver) {
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
         ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.font = "bold 36px monospace";
-        ctx.fillText("GAME OVER", GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20);
-        ctx.fillStyle = "#ffd400";
-        ctx.font = "bold 24px monospace";
-        ctx.fillText(`PONTOS: ${Math.floor(score)}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30);
-        ctx.fillStyle = "#aaaaaa";
+
+        ctx.fillStyle = "white";
+        ctx.font = "28px monospace";
+        ctx.fillText("GAME OVER", GAME_WIDTH / 2 - 90, GAME_HEIGHT / 2);
+
         ctx.font = "16px monospace";
-        ctx.fillText("Toque na tela ou 'R' para reiniciar", GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
-        ctx.textAlign = "left";
+        ctx.fillText("Pressione R para reiniciar", GAME_WIDTH / 2 - 110, GAME_HEIGHT / 2 + 40);
     }
 }
+
+document.addEventListener("keydown", (e) => {
+    if (gameOver && e.key.toLowerCase() === "r")
+        location.reload();
+});
 
 function loop() {
     update();
