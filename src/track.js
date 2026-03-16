@@ -16,31 +16,21 @@ export class Track {
         if (this.offset >= this.canvas.height) this.offset -= this.canvas.height; 
 
         this.spawnTimer--;
-        
-        // DIFICULDADE: Limite de inimigos na tela sobe conforme o nível
         let maxEnemies = Math.min(5, 1 + Math.floor(level / 2));
 
         if (this.spawnTimer <= 0 && this.enemies.length < maxEnemies) {
             this.spawnEnemies(player, level);
-            // Spawn fica mais frequente em níveis altos
             this.spawnTimer = Math.max(30, 100 - (level * 8));
         }
 
         for (const e of this.enemies) {
             let enemyVisualSpeed = e.speed * 0.05;
-            // Efeito clássico: movimento relativo à velocidade do player
             e.y += (visualSpeed - enemyVisualSpeed);
 
-            if (
-                player.x - 26 < e.x + 26 &&
-                player.x + 26 > e.x - 26 &&
-                player.y - 46 < e.y + 46 &&
-                player.y + 46 > e.y - 46
-            ) {
+            if (Math.abs(player.x - e.x) < 52 && Math.abs(player.y - e.y) < 90) {
                 player.crashed = true;
             }
         }
-        // Limpeza com margem para permitir ultrapassagens por trás
         this.enemies = this.enemies.filter(e => e.y < this.canvas.height + 350 && e.y > -350);
     }
 
@@ -48,36 +38,22 @@ export class Track {
         let attempts = 0;
         let safe = false;
         let spawnX = 0;
-
-        // Inimigos ficam mais velozes com o passar dos níveis
         let baseSpeed = 120 + (level * 15);
         let enemySpeed = baseSpeed + Math.random() * 60;
-
-        // Se o inimigo for mais rápido que você, ele "surge" de trás (fundo da tela)
         let spawnY = (enemySpeed > player.speed) ? this.canvas.height + 300 : -300;
 
         while (attempts < 12 && !safe) {
             let lane = Math.floor(Math.random() * this.lanesCount);
             spawnX = this.roadLeft + (this.laneWidth * lane) + (this.laneWidth / 2);
-            
             safe = true;
             for (let e of this.enemies) {
-                // Impede que nasçam colados na mesma faixa
-                if (Math.abs(e.x - spawnX) < 10 && Math.abs(e.y - spawnY) < 400) {
-                    safe = false;
-                    break;
-                }
+                if (Math.abs(e.x - spawnX) < 10 && Math.abs(e.y - spawnY) < 400) safe = false;
             }
             attempts++;
         }
 
         if (safe) {
-            this.enemies.push({
-                x: spawnX,
-                y: spawnY, 
-                speed: enemySpeed,
-                spriteType: Math.random() > 0.5 ? 0 : 1 
-            });
+            this.enemies.push({ x: spawnX, y: spawnY, speed: enemySpeed, spriteType: Math.random() > 0.5 ? 0 : 1 });
         }
     }
 }
