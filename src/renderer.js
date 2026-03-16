@@ -7,9 +7,14 @@ spriteEnemy1.src = './assets/enemy1.png';
 const spriteEnemy2 = new Image();
 spriteEnemy2.src = './assets/enemy2.png';
 
-// Adicionando a nova pista gerada
+// A pista tenta primeiro carregar como PNG. Se falhar, tenta automaticamente como JPG!
 const spriteTrack = new Image();
 spriteTrack.src = './assets/track.png';
+spriteTrack.onerror = function() {
+    if(spriteTrack.src.includes('track.png')) {
+        spriteTrack.src = './assets/track.jpg';
+    }
+};
 
 const enemySprites = [spriteEnemy1, spriteEnemy2];
 
@@ -19,12 +24,12 @@ export function drawTrack(ctx, track) {
     const h = ctx.canvas.height;
 
     if (spriteTrack.complete && spriteTrack.naturalWidth !== 0) {
-        // Pista descendo
+        // Pista a descer
         ctx.drawImage(spriteTrack, 0, track.offset, w, h);
-        // Pista "gêmea" grudada em cima para fechar o loop infinito perfeitamente
+        // Pista "gémea" colada em cima para fechar o loop infinito sem cortes
         ctx.drawImage(spriteTrack, 0, track.offset - h, w, h);
     } else {
-        // Fallback caso a imagem não carregue
+        // Plano de segurança caso a imagem não carregue de todo
         ctx.fillStyle = "#2d7a2d";
         ctx.fillRect(0, 0, w, h);
         ctx.fillStyle = "#3a3a3a";
@@ -47,6 +52,14 @@ export function drawTrack(ctx, track) {
                 ctx.fillRect(x - 2, y, 4, 30);
             }
         }
+        
+        // Mensagem de Erro visual para facilitar a resolução
+        ctx.fillStyle = "#ffd400";
+        ctx.font = "bold 16px monospace";
+        ctx.fillText("IMAGEM DA PISTA NÃO ENCONTRADA!", track.roadLeft + 20, h / 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "12px monospace";
+        ctx.fillText("Verifique a pasta 'assets'.", track.roadLeft + 20, (h / 2) + 20);
     }
 }
 
