@@ -9,15 +9,18 @@ export class Player {
         this.y = this.yBottom; 
         
         this.speed = 0;
-        this.maxSpeed = 230; 
-        this.accel = 1.5;
-        this.braking = 3.0;
+        this.maxSpeed = 250; // Começa em 250km/h
+        this.accel = 1.6;
+        this.braking = 3.5;
         this.friction = 0.5;
-        this.turnSpeed = 5.0;
+        this.turnSpeed = 5.5;
         this.crashed = false;
     }
 
-    update(input) {
+    update(input, level) {
+        // Aumenta a velocidade máxima: +10km/h por nível, até o limite de 350km/h
+        this.maxSpeed = Math.min(350, 250 + (level - 1) * 10);
+
         if (input.up) {
             this.speed += this.accel;
         } else if (input.down) {
