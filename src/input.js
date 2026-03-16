@@ -8,7 +8,6 @@ export const input = {
 
 const canvas = document.getElementById("game");
 
-// Teclado
 document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") input.left = true;
     if (e.key === "ArrowRight") input.right = true;
@@ -23,7 +22,6 @@ document.addEventListener("keyup", (e) => {
     if (e.key === "ArrowDown") input.down = false;
 });
 
-// Controle de toque (Lados da tela viram, segurar acelera automaticamente)
 canvas.addEventListener("touchstart", touch, { passive: false });
 canvas.addEventListener("touchmove", touch, { passive: false });
 canvas.addEventListener("touchend", () => {
@@ -48,6 +46,6 @@ function touch(e) {
         input.left = false;
     }
 
-    input.up = true; // No mobile, tocar na tela já acelera
+    input.up = true; 
     input.touch = true;
 }
