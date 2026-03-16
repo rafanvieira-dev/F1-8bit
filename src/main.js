@@ -6,8 +6,9 @@ import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen, drawGameOver
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-const GAME_WIDTH = window.innerWidth > window.innerHeight ? 720 : 360;
-const GAME_HEIGHT = window.innerWidth > window.innerHeight ? 900 : 640;
+// Resolução aumentada para tirar o efeito de "zoom"
+const GAME_WIDTH = window.innerWidth > window.innerHeight ? 800 : 480;
+const GAME_HEIGHT = window.innerWidth > window.innerHeight ? 1000 : 800;
 
 function resize() {
     canvas.width = GAME_WIDTH;
@@ -26,14 +27,8 @@ let paused = false;
 let supportMessage = "";
 
 const messages = [
-    "Boa pilotagem!",
-    "Continue assim!",
-    "Você pode melhorar!",
-    "Quase lá! Tente de novo.",
-    "Mantenha o foco!",
-    "Grande pilotagem, campeão!",
-    "Acelere com sabedoria!",
-    "O treino leva à perfeição."
+    "Boa pilotagem!", "Continue assim!", "Você pode melhorar!",
+    "Quase lá!", "Mantenha o foco!", "Acelere com sabedoria!", "O treino leva à perfeição."
 ];
 
 document.addEventListener("keydown", (e) => {
