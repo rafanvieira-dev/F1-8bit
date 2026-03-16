@@ -6,24 +6,17 @@ import { drawTrack, drawCar, drawEnemies, drawHUD } from "./renderer.js";
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-/* detectar desktop */
 const isDesktop = window.innerWidth > window.innerHeight;
-
-/* resolução base dinâmica */
 const GAME_WIDTH = isDesktop ? 720 : 360;
 const GAME_HEIGHT = isDesktop ? 900 : 640;
-
 let scale = 1;
 
 function resize() {
     const sw = window.innerWidth;
     const sh = window.innerHeight;
-
     scale = Math.min(sw / GAME_WIDTH, sh / GAME_HEIGHT);
-
     canvas.width = GAME_WIDTH;
     canvas.height = GAME_HEIGHT;
-
     canvas.style.width = (GAME_WIDTH * scale) + "px";
     canvas.style.height = (GAME_HEIGHT * scale) + "px";
 }
@@ -43,7 +36,6 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "p") paused = !paused;
 });
 
-/* ================= FIM DE JOGO ================= */
 function saveRecord() {
     const time = ((Date.now() - start) / 1000).toFixed(1);
     const kmh = Math.floor(player.speed);
@@ -62,10 +54,8 @@ function saveRecord() {
     }
 }
 
-/* ================= UPDATE ================= */
 function update() {
     if (gameOver || paused) return;
-
     player.update(input);
     track.update(player);
 
@@ -75,7 +65,6 @@ function update() {
     }
 }
 
-/* ================= RENDER ================= */
 function render() {
     ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
@@ -84,7 +73,7 @@ function render() {
     drawCar(ctx, player);
 
     const time = ((Date.now() - start) / 1000).toFixed(1);
-    drawHUD(ctx, time, Math.floor(player.speed), record);
+    drawHUD(ctx, time, Math.floor(player.speed));
 
     if (gameOver) {
         ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -104,7 +93,6 @@ document.addEventListener("keydown", (e) => {
         location.reload();
 });
 
-/* ================= LOOP ================= */
 function loop() {
     update();
     render();
