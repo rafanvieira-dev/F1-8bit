@@ -9,7 +9,6 @@ spriteEnemy2.src = './assets/enemy2.png';
 
 const enemySprites = [spriteEnemy1, spriteEnemy2];
 
-// ================= PISTA =================
 export function drawTrack(ctx, track) {
     const h = ctx.canvas.height;
     const w = ctx.canvas.width;
@@ -39,7 +38,6 @@ export function drawTrack(ctx, track) {
     }
 }
 
-// ================= TELA INICIAL =================
 export function drawStartScreen(ctx) {
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
@@ -77,7 +75,6 @@ export function drawStartScreen(ctx) {
     ctx.textBaseline = "alphabetic";
 }
 
-// ================= HUD =================
 export function drawHUD(ctx, score, level, speed) {
     ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
     ctx.fillRect(0, 0, ctx.canvas.width, 45);
@@ -94,14 +91,13 @@ export function drawHUD(ctx, score, level, speed) {
     ctx.fillText(`LEVEL: ${level}`, ctx.canvas.width / 2, 22.5);
 
     ctx.textAlign = "right";
-    ctx.fillStyle = speed >= 210 ? "#ff4444" : "#00ff00"; 
+    ctx.fillStyle = speed >= 210 ? "#ff4444" : "#00ff00";
     ctx.fillText(`${speed} KM/H`, ctx.canvas.width - 15, 22.5);
 
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 }
 
-// ================= CARROS =================
 function drawF1(ctx, x, y, main, second, visor) {
     ctx.fillStyle = second;
     ctx.fillRect(x - 18, y - 6, 36, 4);
@@ -125,12 +121,9 @@ export function drawCar(ctx, p) {
     }
 }
 
-// ================= CARROS INIMIGOS =================
 export function drawEnemies(ctx, track) {
     for (const e of track.enemies) {
-        // Agora o renderizador lê a propriedade spriteType sorteada lá no track.js
         let sprite = (e.spriteType === 0) ? enemySprites[0] : enemySprites[1];
-
         if (sprite.complete && sprite.naturalWidth !== 0) {
             ctx.drawImage(sprite, e.x - 30, e.y - 50, 60, 100);
         } else {
