@@ -7,7 +7,6 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 const isDesktop = window.innerWidth > window.innerHeight;
-const isMobile = !isDesktop; // NOVO: Detecção para o modo Mobile
 const GAME_WIDTH = isDesktop ? 720 : 360;
 const GAME_HEIGHT = isDesktop ? 900 : 640;
 let scale = 1;
@@ -33,15 +32,16 @@ let score = 0;
 let level = 1;
 let paused = false;
 
+// Variáveis do Mentor (Senna)
 let supportMessage = "";
 const tips = [
-    "Dica: Antecipe os seus movimentos.",
-    "Boa pilotagem! Treine seus reflexos.",
-    isMobile ? "Aceleração Automática ativada! Foco na direção." : "Atenção aos carros rápidos que vêm de trás!",
+    "Dica: Solte o acelerador para desviar melhor.",
+    "Boa pilotagem! Treine antecipar os movimentos.",
+    "Atenção aos carros rápidos que vêm de trás!",
     "Continue assim! Seus reflexos estão ótimos.",
-    "Cada erro é uma lição na F1.",
+    "Frear também faz parte de uma boa pilotagem.",
     "Você tem talento! Só precisa de mais pista.",
-    "O carro está perfeito, acredite no seu tempo de reação."
+    "Quase lá! Cada erro é uma lição na F1."
 ];
 
 document.addEventListener("keydown", (e) => {
@@ -55,7 +55,6 @@ canvas.addEventListener("touchstart", () => {
 
 function update() {
     if (gameState === "START") {
-        // Tocar na tela ou pressionar para cima inicia o jogo
         if (input.up || input.touch) {
             gameState = "PLAYING";
         }
@@ -64,13 +63,22 @@ function update() {
 
     if (gameState === "GAMEOVER" || gameState === "WIN" || paused) return;
 
-    // NOVO: Passando isMobile para alterar o comportamento
-    player.update(input, level, isMobile);
-    track.update(player, level, isMobile);
+    // A física, o limite de 350 km/h e a dificuldade brutal estão seguros aqui
+    player.update(input, level);
+    track.update(player, level);
 
+    // 1. PONTUAÇÃO BASE: Ganha pontos pela velocidade
     score += player.speed * 0.015;
+
+    // 2. MUDANÇA DE FAIXA (NOVO): Ganha pontos BÔNUS se estiver manobrando / costurando o trânsito
+    if ((input.left || input.right) && player.speed > 0) {
+        score += player.speed * 0.012; // Acelera muito o ganho de pontos durante a mudança de posição!
+    }
+
+    // O nível sobe a cada 500 pontos, trazendo mais inimigos e mais velocidade
     level = Math.floor(score / 500) + 1;
 
+    // MENTOR: Vitória no Nível 100 ou Dicas de apoio no Game Over
     if (level >= 100) {
         gameState = "WIN";
         supportMessage = "Parabéns! Sua pilotagem foi impecável. Você ganhou a corrida!";
@@ -95,6 +103,7 @@ function render() {
     drawHUD(ctx, score, level, Math.floor(player.speed));
 
     if (gameState === "GAMEOVER" || gameState === "WIN") {
+        // Chama a tela especial com a imagem do Senna
         drawGameOverScreen(ctx, score, supportMessage, gameState === "WIN");
     }
 }
