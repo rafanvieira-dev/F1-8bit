@@ -1,4 +1,4 @@
-// Carregando as imagens
+// Carregando apenas as imagens dos carros
 const spritePlayer = new Image();
 spritePlayer.src = './assets/player.png';
 
@@ -8,10 +8,9 @@ spriteEnemy1.src = './assets/enemy1.png';
 const spriteEnemy2 = new Image();
 spriteEnemy2.src = './assets/enemy2.png';
 
-// Array para sortear os inimigos
 const enemySprites = [spriteEnemy1, spriteEnemy2];
 
-// ================= PISTA =================
+// ================= PISTA (Desenhada por código) =================
 export function drawTrack(ctx, track) {
     ctx.fillStyle = "#3a3a3a";
     ctx.fillRect(track.roadLeft, 0, track.roadWidth, 640);
@@ -20,7 +19,7 @@ export function drawTrack(ctx, track) {
     for (let y = track.offset % 40; y < 640; y += 40) {
         ctx.fillStyle = "#ff0000";
         ctx.fillRect(track.roadLeft, y, 10, 20);
-        ctx.fillRect(track.roadLeft + track.roadWidth - 10, y, 20);
+        ctx.fillRect(track.roadLeft + track.roadWidth - 10, y, 10, 20);
 
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(track.roadLeft, y + 20, 10, 20);
@@ -44,7 +43,6 @@ export function drawHUD(ctx, time, speed) {
     ctx.fillText(`Vel: ${speed} kmh`, 10, 40);
 }
 
-
 // ================= CARROS =================
 // Fallback: mantém o desenho antigo caso a imagem falhe ou demore a carregar
 function drawF1(ctx, x, y, main, second, visor) {
@@ -64,7 +62,6 @@ function drawF1(ctx, x, y, main, second, visor) {
 
 export function drawCar(ctx, p) {
     if (spritePlayer.complete && spritePlayer.naturalWidth !== 0) {
-        // Ajuste o 40 e 60 dependendo do tamanho real do seu PNG após recortar
         ctx.drawImage(spritePlayer, p.x - 20, p.y - 30, 40, 60);
     } else {
         drawF1(ctx, p.x, p.y, "#ffffff", "#e10600", "#00d0ff");
@@ -73,7 +70,6 @@ export function drawCar(ctx, p) {
 
 export function drawEnemies(ctx, track) {
     for (const e of track.enemies) {
-        // Escolhe o spriteEnemy1 ou spriteEnemy2 baseado na posição X do inimigo 
         let sprite = (Math.floor(e.x) % 2 === 0) ? enemySprites[0] : enemySprites[1];
 
         if (sprite.complete && sprite.naturalWidth !== 0) {
