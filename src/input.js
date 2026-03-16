@@ -46,6 +46,6 @@ function touch(e) {
         input.left = false;
     }
 
-    input.up = true;
+    input.up = true; 
     input.touch = true;
 }
