@@ -3,8 +3,11 @@ export class Track {
     constructor(canvas) {
         this.canvas = canvas;
         this.offset = 0;
-        this.roadWidth = canvas.width * 0.45;
+        
+        // Pista alargada para 75% da largura da tela
+        this.roadWidth = canvas.width * 0.75;
         this.roadLeft = (canvas.width - this.roadWidth) / 2;
+        
         this.lanesCount = 4;
         this.laneWidth = this.roadWidth / this.lanesCount;
         this.enemies = [];
@@ -15,7 +18,7 @@ export class Track {
         let visualSpeed = player.speed * 0.05; 
         
         this.offset += visualSpeed;
-        if (this.offset > 60) this.offset -= 60; // Loop curto para a pista desenhada
+        if (this.offset > 60) this.offset -= 60; 
 
         this.spawnTimer--;
         if (this.spawnTimer <= 0) {
@@ -27,11 +30,12 @@ export class Track {
             let enemyVisualSpeed = e.speed * 0.05;
             e.y += (visualSpeed - enemyVisualSpeed);
 
+            // Colisão ampliada para o carro de 60x90 (Margem de segurança de ~25px na largura e ~40px na altura)
             if (
-                player.x - 18 < e.x + 18 &&
-                player.x + 18 > e.x - 18 &&
-                player.y - 28 < e.y + 28 &&
-                player.y + 28 > e.y - 28
+                player.x - 25 < e.x + 25 &&
+                player.x + 25 > e.x - 25 &&
+                player.y - 40 < e.y + 40 &&
+                player.y + 40 > e.y - 40
             ) {
                 player.crashed = true;
             }
@@ -41,14 +45,15 @@ export class Track {
     }
 
     spawnEnemies() {
-        const padding = 25;
+        // Margem maior (padding) para evitar que o carro maior nasça cortado na zebra
+        const padding = 35;
         const minX = this.roadLeft + padding;
         const maxX = this.roadLeft + this.roadWidth - padding;
         const randomX = Math.random() * (maxX - minX) + minX;
 
         this.enemies.push({
             x: randomX,
-            y: -80,
+            y: -100, // Nascem um pouco mais acima na tela
             speed: 100 + Math.random() * 60 
         });
     }
