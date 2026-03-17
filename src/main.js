@@ -7,17 +7,13 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 const isDesktop = window.innerWidth > window.innerHeight;
-const isMobile = !isDesktop; // DETECTA MODO MOBILE AQUI
+const isMobile = !isDesktop; // Detecta o modo Mobile
 
-const GAME_WIDTH = isDesktop ? 720 : 360;
-const GAME_HEIGHT = isDesktop ? 900 : 640;
-
-function resize() {
-    canvas.width = GAME_WIDTH;
-    canvas.height = GAME_HEIGHT;
-}
-resize();
-window.addEventListener("resize", resize);
+// Resolução interna fixa. O CSS cuidará de ajustar o tamanho na sua tela!
+const GAME_WIDTH = 540;
+const GAME_HEIGHT = 960;
+canvas.width = GAME_WIDTH;
+canvas.height = GAME_HEIGHT;
 
 const track = new Track(canvas);
 const player = new Player(track);
@@ -41,12 +37,11 @@ const messages = [
 
 document.addEventListener("keydown", (e) => {
     if (e.key === "p" && gameState === "PLAYING") paused = !paused;
-    if (e.key.toLowerCase() === "r" && gameState === "GAMEOVER") location.reload();
+    if (e.key.toLowerCase() === "r" && (gameState === "GAMEOVER" || gameState === "WIN")) location.reload();
 });
 
-// Permite reiniciar tocando na tela após bater
 canvas.addEventListener("touchstart", () => {
-    if (gameState === "GAMEOVER") location.reload();
+    if (gameState === "GAMEOVER" || gameState === "WIN") location.reload();
 });
 
 function update() {
@@ -54,16 +49,25 @@ function update() {
         if (input.up || input.touch) gameState = "PLAYING";
         return;
     }
-    if (gameState === "GAMEOVER" || paused) return;
+    if (gameState === "GAMEOVER" || gameState === "WIN" || paused) return;
 
-    // PASSAMOS O isMobile PARA O CARRO E PARA A PISTA
     player.update(input, level, isMobile); 
     track.update(player, level, isMobile);
 
+    // Pontuação Base
     score += player.speed * 0.015;
+
+    // Bônus de Pontuação por mudar de faixa (costurar o trânsito)
+    if ((input.left || input.right) && player.speed > 0) {
+        score += player.speed * 0.012; 
+    }
+
     level = Math.floor(score / 500) + 1;
 
-    if (player.crashed) {
+    if (level >= 100) {
+        gameState = "WIN";
+        supportMessage = "Parabéns! Sua pilotagem foi impecável. Você ganhou a corrida!";
+    } else if (player.crashed) {
         gameState = "GAMEOVER";
         supportMessage = messages[Math.floor(Math.random() * messages.length)];
     }
@@ -82,8 +86,8 @@ function render() {
     drawCar(ctx, player);
     drawHUD(ctx, score, level, Math.floor(player.speed));
 
-    if (gameState === "GAMEOVER") {
-        drawGameOverScreen(ctx, score, supportMessage);
+    if (gameState === "GAMEOVER" || gameState === "WIN") {
+        drawGameOverScreen(ctx, score, supportMessage, gameState === "WIN");
     }
 }
 
@@ -92,4 +96,5 @@ function loop() {
     render();
     requestAnimationFrame(loop);
 }
+
 loop();
