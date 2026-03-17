@@ -2,25 +2,24 @@ export class Player {
     constructor(track) {
         this.track = track;
         this.x = track.roadLeft + (track.roadWidth / 2);
+        
         this.yBottom = track.canvas.height - 120; 
         this.yTop = track.canvas.height / 2.2;    
         this.y = this.yBottom; 
         
         this.speed = 0;
         this.maxSpeed = 250; 
-        this.accel = 1.6;
-        this.braking = 3.5;
+        this.accel = 1.5;
+        this.braking = 3.0;
         this.friction = 0.5;
-        this.turnSpeed = 5.5;
+        this.turnSpeed = 5.0;
         this.crashed = false;
     }
 
-    update(input, level, isMobile) {
-        // Velocidade aumenta 10km/h por nível até 350km/h
-        this.maxSpeed = Math.min(350, 250 + (level - 1) * 10);
+    update(input, level) {
+        this.maxSpeed = Math.min(350, 250 + level);
 
-        // SE FOR MOBILE, ACELERA AUTOMATICAMENTE
-        if (input.up || isMobile) {
+        if (input.up) {
             this.speed += this.accel;
         } else if (input.down) {
             this.speed -= this.braking;
@@ -33,14 +32,26 @@ export class Player {
 
         let speedFactor = this.speed / this.maxSpeed; 
         
-        if (input.left && this.speed > 0) this.x -= this.turnSpeed * (speedFactor + 0.4); 
-        if (input.right && this.speed > 0) this.x += this.turnSpeed * (speedFactor + 0.4);
+        if (input.left && this.speed > 0) {
+            this.x -= this.turnSpeed * (speedFactor + 0.4); 
+        }
+        if (input.right && this.speed > 0) {
+            this.x += this.turnSpeed * (speedFactor + 0.4);
+        }
 
         const leftEdge = this.track.roadLeft + 30;
         const rightEdge = this.track.roadLeft + this.track.roadWidth - 30;
 
-        if (this.x < leftEdge) { this.x = leftEdge; this.speed -= 1; }
-        if (this.x > rightEdge) { this.x = rightEdge; this.speed -= 1; }
+        if (this.x < leftEdge) {
+            this.x = leftEdge;
+            this.speed -= this.friction * 2; 
+        }
+        if (this.x > rightEdge) {
+            this.x = rightEdge;
+            this.speed -= this.friction * 2; 
+        }
+        
+        if (this.speed < 0) this.speed = 0;
 
         const targetY = this.yBottom - (speedFactor * (this.yBottom - this.yTop));
         this.y += (targetY - this.y) * 0.05;
