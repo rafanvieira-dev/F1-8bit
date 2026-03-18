@@ -22,8 +22,8 @@ let paused = false;
 let supportMessage = "";
 
 // ================= ÁUDIO =================
-// Certifica-te de ter um arquivo 'musica.mp3' na pasta 'assets'
-const bgMusic = new Audio('./assets/musica.mp3'); 
+// Caminho atualizado para a pasta 'music' que está fora da 'assets'
+const bgMusic = new Audio('./music/musica.mp3'); // Altera 'musica.mp3' para o nome exato do teu ficheiro
 bgMusic.loop = true;  // A música repete infinitamente
 bgMusic.volume = 0.4; // Volume de 0.0 a 1.0 (40% para não abafar os efeitos)
 
@@ -61,7 +61,7 @@ function update() {
     if (gameState === "START") {
         if (input.up || input.touch) {
             gameState = "PLAYING";
-            // Inicia a música no primeiro comando (resolve o bloqueio de autoplay dos navegadores)
+            // Inicia a música no primeiro comando
             bgMusic.play().catch(e => console.log("Áudio bloqueado pelo navegador:", e));
         }
         return;
