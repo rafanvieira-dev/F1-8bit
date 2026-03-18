@@ -15,7 +15,6 @@ spriteTrack.onerror = function() {
     }
 };
 
-// NOVO: Carregando o Mentor
 const spriteDriver = new Image();
 spriteDriver.src = './assets/driver.png';
 
@@ -80,7 +79,6 @@ export function drawStartScreen(ctx) {
     ctx.fillStyle = "#ffffff";
     ctx.font = "14px monospace";
     ctx.fillText("PC: Setas (Virar e Acelerar)", w / 2, h * 0.60);
-    // NOVO: Alerta visual de aceleração automática no mobile
     ctx.fillText("MOBILE: Toque nos Lados (Auto-Acelera)", w / 2, h * 0.64);
 
     if (Math.floor(Date.now() / 600) % 2 === 0) {
@@ -92,8 +90,8 @@ export function drawStartScreen(ctx) {
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 }
-// ...
-// ================= TELA DE GAME OVER / VITÓRIA COM MENTOR =================
+
+// ================= TELA DE GAME OVER / VITÓRIA COM MENTOR E QUEBRA DE LINHA =================
 export function drawGameOverScreen(ctx, score, message, isWin) {
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
@@ -102,34 +100,61 @@ export function drawGameOverScreen(ctx, score, message, isWin) {
     ctx.fillRect(0, 0, w, h);
 
     if (spriteDriver.complete && spriteDriver.naturalWidth !== 0) {
-        // Desenha o mentor centralizado
         ctx.drawImage(spriteDriver, w / 2 - 100, h / 2 - 250, 200, 300);
     }
 
     ctx.textAlign = "center";
     
-    // Mensagem de apoio ou dica
+    // ----------------------------------------------------------------
+    // A MÁGICA DA QUEBRA DE LINHA ACONTECE AQUI!
+    // ----------------------------------------------------------------
     ctx.fillStyle = "#00d0ff";
     ctx.font = "italic bold 16px monospace";
-    ctx.fillText(`"${message}"`, w / 2, h / 2 + 80);
+    
+    const text = `"${message}"`;
+    const maxWidth = w - 40; // Dá uma margem de segurança para não encostar na borda
+    const lineHeight = 22; // Espaço entre a linha de cima e a de baixo
+    const words = text.split(' ');
+    let line = '';
+    let y = h / 2 + 50; 
+
+    // O código vai palavra por palavra. Se a linha ficar muito grande, ele desce para a próxima!
+    for (let n = 0; n < words.length; n++) {
+        let testLine = line + words[n] + ' ';
+        let metrics = ctx.measureText(testLine);
+        let testWidth = metrics.width;
+        
+        if (testWidth > maxWidth && n > 0) {
+            ctx.fillText(line, w / 2, y);
+            line = words[n] + ' ';
+            y += lineHeight; 
+        } else {
+            line = testLine;
+        }
+    }
+    ctx.fillText(line, w / 2, y); // Escreve o final da frase
+    // ----------------------------------------------------------------
+
+    // A variável 'startY' pega na posição onde a frase terminou, para desenhar o "GAME OVER" mais abaixo, evitando que as letras fiquem umas por cima das outras.
+    let startY = y + 40; 
 
     if (isWin) {
-        ctx.fillStyle = "#00ff00"; // Verde para vitória
+        ctx.fillStyle = "#00ff00"; 
         ctx.font = "bold 36px monospace";
-        ctx.fillText("VOCÊ VENCEU!", w / 2, h / 2 + 130);
+        ctx.fillText("VOCÊ VENCEU!", w / 2, startY);
     } else {
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 36px monospace";
-        ctx.fillText("GAME OVER", w / 2, h / 2 + 130);
+        ctx.fillText("GAME OVER", w / 2, startY);
     }
 
     ctx.fillStyle = "#ffd400";
     ctx.font = "bold 24px monospace";
-    ctx.fillText(`PONTOS: ${Math.floor(score)}`, w / 2, h / 2 + 170);
+    ctx.fillText(`PONTOS: ${Math.floor(score)}`, w / 2, startY + 40);
 
     ctx.fillStyle = "#aaaaaa";
     ctx.font = "16px monospace";
-    ctx.fillText("Pressione 'R' para reiniciar", w / 2, h / 2 + 220);
+    ctx.fillText("Pressione 'R' ou Toque para reiniciar", w / 2, startY + 90);
     
     ctx.textAlign = "left";
 }
