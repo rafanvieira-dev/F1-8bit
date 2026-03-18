@@ -21,6 +21,12 @@ let level = 1;
 let paused = false;
 let supportMessage = "";
 
+// ================= ÁUDIO =================
+// Certifica-te de ter um arquivo 'musica.mp3' na pasta 'assets'
+const bgMusic = new Audio('./assets/musica.mp3'); 
+bgMusic.loop = true;  // A música repete infinitamente
+bgMusic.volume = 0.4; // Volume de 0.0 a 1.0 (40% para não abafar os efeitos)
+
 const tips = [
     "Dica: Solte o acelerador para desviar melhor.",
     "Boa pilotagem! Treine antecipar os movimentos.",
@@ -32,8 +38,19 @@ const tips = [
 ];
 
 document.addEventListener("keydown", (e) => {
-    if (e.key === "p" && gameState === "PLAYING") paused = !paused;
-    if (e.key.toLowerCase() === "r" && (gameState === "GAMEOVER" || gameState === "WIN")) location.reload();
+    // Sistema de Pause atualizado para pausar/tocar a música também
+    if (e.key === "p" && gameState === "PLAYING") {
+        paused = !paused;
+        if (paused) {
+            bgMusic.pause();
+        } else {
+            bgMusic.play().catch(() => {}); // Retoma a música ao despausar
+        }
+    }
+    
+    if (e.key.toLowerCase() === "r" && (gameState === "GAMEOVER" || gameState === "WIN")) {
+        location.reload();
+    }
 });
 
 canvas.addEventListener("touchstart", () => {
@@ -44,6 +61,8 @@ function update() {
     if (gameState === "START") {
         if (input.up || input.touch) {
             gameState = "PLAYING";
+            // Inicia a música no primeiro comando (resolve o bloqueio de autoplay dos navegadores)
+            bgMusic.play().catch(e => console.log("Áudio bloqueado pelo navegador:", e));
         }
         return;
     }
@@ -56,12 +75,17 @@ function update() {
     score += player.speed * 0.015;
     level = Math.floor(score / 500) + 1;
 
+    // Condição de Vitória (Nível 100)
     if (level >= 100) {
         gameState = "WIN";
         supportMessage = "Parabéns! Sua pilotagem foi impecável. Você ganhou a corrida!";
-    } else if (player.crashed) {
+        bgMusic.pause(); // Para a música ao vencer
+    } 
+    // Condição de Derrota (Batida)
+    else if (player.crashed) {
         gameState = "GAMEOVER";
         supportMessage = tips[Math.floor(Math.random() * tips.length)];
+        bgMusic.pause(); // Para a música ao bater
     }
 }
 
