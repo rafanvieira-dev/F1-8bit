@@ -1,12 +1,11 @@
 import { input } from "./input.js";
 import { Player } from "./player.js";
 import { Track } from "./track.js";
-import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen, drawGameOverScreen } from "./renderer.js";
+import { drawTrack, drawCar, drawEnemies, drawHUD, drawStartScreen, drawGameOverScreen, drawLoadingScreen } from "./renderer.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// Resolução estilo Arcade/Fliperama
 const GAME_WIDTH = 540;
 const GAME_HEIGHT = 960;
 canvas.width = GAME_WIDTH;
@@ -15,30 +14,56 @@ canvas.height = GAME_HEIGHT;
 const track = new Track(canvas);
 const player = new Player(track);
 
-let gameState = "START"; 
+// O JOGO AGORA COMEÇA NO ESTADO DE LOADING
+let gameState = "LOADING"; 
 let score = 0;
 let level = 1;
 let paused = false;
 let supportMessage = "";
 
-// ================= ÁUDIO =================
+// ================= ÁUDIO E SISTEMA DE CARREGAMENTO =================
+let audiosCarregados = 0;
+const totalAudios = 4; // Temos 4 ficheiros de áudio para carregar
+
+function verificarCarregamento() {
+    audiosCarregados++;
+    // Se todos os 4 áudios estiverem prontos, passa para a tela de START
+    if (audiosCarregados >= totalAudios && gameState === "LOADING") {
+        gameState = "START";
+    }
+}
+
+// Criar os áudios e forçar o pré-carregamento ("preload = 'auto'")
 const bgMusic = new Audio('./assets/music/musica.mp3'); 
 bgMusic.loop = true;  
 bgMusic.volume = 0.4; 
+bgMusic.preload = 'auto';
+bgMusic.addEventListener('canplaythrough', verificarCarregamento, { once: true });
 
-// NOVOS ÁUDIOS:
 const crashSound = new Audio('./assets/music/batida.mp3');
 crashSound.volume = 0.8; 
+crashSound.preload = 'auto';
+crashSound.addEventListener('canplaythrough', verificarCarregamento, { once: true });
 
 const gameOverMusic = new Audio('./assets/music/gameover.mp3');
 gameOverMusic.volume = 0.5;
+gameOverMusic.preload = 'auto';
+gameOverMusic.addEventListener('canplaythrough', verificarCarregamento, { once: true });
 
 const victoryMusic = new Audio('./assets/music/vitoria.mp3');
 victoryMusic.volume = 0.6;
+victoryMusic.preload = 'auto';
+victoryMusic.addEventListener('canplaythrough', verificarCarregamento, { once: true });
 
-// ================= DICAS / FRASES DO MENTOR (INSPIRADAS EM SENNA) =================
+// Sistema de segurança: Se a internet estiver muito lenta ou falhar, 
+// força a ida para o START após 4 segundos para o jogador não ficar preso.
+setTimeout(() => {
+    if (gameState === "LOADING") gameState = "START";
+}, 4000);
+
+
+// ================= DICAS / FRASES DO MENTOR =================
 const tips = [
-    // Frases clássicas
     "O segundo colocado é apenas o primeiro dos perdedores.",
     "Dedicação total: busque o seu último limite e dê o melhor de si.",
     "Você não pode conhecer os seus limites sem testá-los.",
@@ -61,31 +86,25 @@ const tips = [
     "No que diz respeito ao empenho e ao esforço, não existe meio termo."
 ];
 
-// Função para forçar o áudio a iniciar na primeira interação real
+// Iniciar a música na primeira interação
 let musicStarted = false;
 function startMusic() {
-    if (!musicStarted) {
-        bgMusic.play().catch(e => console.log("Navegador bloqueou o áudio:", e));
+    if (!musicStarted && gameState !== "LOADING") {
+        bgMusic.play().catch(e => console.log("Áudio bloqueado:", e));
         musicStarted = true;
     }
 }
 
-// Escuta o primeiro toque na tela ou tecla pressionada
 document.addEventListener("keydown", startMusic, { once: true });
 canvas.addEventListener("touchstart", startMusic, { once: true });
-
 
 document.addEventListener("keydown", (e) => {
     if (e.key === "p" && gameState === "PLAYING") {
         paused = !paused;
-        if (paused) {
-            bgMusic.pause();
-        } else {
-            bgMusic.play().catch(() => {});
-        }
+        if (paused) bgMusic.pause();
+        else bgMusic.play().catch(() => {});
     }
     
-    // O jogo dá "reload" na página ao apertar R, o que já para todos os sons automaticamente
     if (e.key.toLowerCase() === "r" && (gameState === "GAMEOVER" || gameState === "WIN")) {
         location.reload();
     }
@@ -96,6 +115,9 @@ canvas.addEventListener("touchstart", () => {
 });
 
 function update() {
+    // Se ainda está a carregar, não faz nada
+    if (gameState === "LOADING") return;
+
     if (gameState === "START") {
         if (input.up || input.touch) {
             gameState = "PLAYING";
@@ -111,23 +133,16 @@ function update() {
     score += player.speed * 0.015;
     level = Math.floor(score / 500) + 1;
 
-    // CONDIÇÃO DE VITÓRIA
     if (level >= 100) {
         gameState = "WIN";
         supportMessage = "Parabéns! Sua pilotagem foi impecável. Você ganhou a corrida!";
-        
         bgMusic.pause(); 
         victoryMusic.play().catch(() => {}); 
-        
     } 
-    // CONDIÇÃO DE DERROTA (Batida)
     else if (player.crashed) {
         gameState = "GAMEOVER";
-        // Sorteia uma das frases épicas do Senna
         supportMessage = tips[Math.floor(Math.random() * tips.length)];
-        
         bgMusic.pause(); 
-        
         crashSound.play().catch(() => {});
         gameOverMusic.play().catch(() => {});
     }
@@ -135,6 +150,12 @@ function update() {
 
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Se estiver no Loading, desenha só a tela de carregamento
+    if (gameState === "LOADING") {
+        drawLoadingScreen(ctx);
+        return;
+    }
 
     drawTrack(ctx, track);
 
