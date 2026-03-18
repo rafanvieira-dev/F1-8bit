@@ -22,10 +22,9 @@ let paused = false;
 let supportMessage = "";
 
 // ================= ÁUDIO =================
-// Caminho atualizado para a pasta 'music' que está fora da 'assets'
-const bgMusic = new Audio('./music/music.mp3'); // Altera 'music.mp3' para o nome exato do teu ficheiro
-bgMusic.loop = true;  // A música repete infinitamente
-bgMusic.volume = 0.4; // Volume de 0.0 a 1.0 (40% para não abafar os efeitos)
+const bgMusic = new Audio('./music/musica.mp3'); 
+bgMusic.loop = true;  
+bgMusic.volume = 0.4; 
 
 const tips = [
     "Dica: Solte o acelerador para desviar melhor.",
@@ -37,14 +36,27 @@ const tips = [
     "Quase lá! Cada erro é uma lição na F1."
 ];
 
+// NOVO: Função para forçar o áudio a iniciar na primeira interação real
+let musicStarted = false;
+function startMusic() {
+    if (!musicStarted) {
+        bgMusic.play().catch(e => console.log("Navegador bloqueou o áudio:", e));
+        musicStarted = true;
+    }
+}
+
+// Escuta o primeiro toque na tela ou tecla pressionada e remove o evento a seguir (once: true)
+document.addEventListener("keydown", startMusic, { once: true });
+canvas.addEventListener("touchstart", startMusic, { once: true });
+
+
 document.addEventListener("keydown", (e) => {
-    // Sistema de Pause atualizado para pausar/tocar a música também
     if (e.key === "p" && gameState === "PLAYING") {
         paused = !paused;
         if (paused) {
             bgMusic.pause();
         } else {
-            bgMusic.play().catch(() => {}); // Retoma a música ao despausar
+            bgMusic.play().catch(() => {});
         }
     }
     
@@ -61,8 +73,6 @@ function update() {
     if (gameState === "START") {
         if (input.up || input.touch) {
             gameState = "PLAYING";
-            // Inicia a música no primeiro comando
-            bgMusic.play().catch(e => console.log("Áudio bloqueado pelo navegador:", e));
         }
         return;
     }
@@ -75,17 +85,14 @@ function update() {
     score += player.speed * 0.015;
     level = Math.floor(score / 500) + 1;
 
-    // Condição de Vitória (Nível 100)
     if (level >= 100) {
         gameState = "WIN";
         supportMessage = "Parabéns! Sua pilotagem foi impecável. Você ganhou a corrida!";
-        bgMusic.pause(); // Para a música ao vencer
-    } 
-    // Condição de Derrota (Batida)
-    else if (player.crashed) {
+        bgMusic.pause(); 
+    } else if (player.crashed) {
         gameState = "GAMEOVER";
         supportMessage = tips[Math.floor(Math.random() * tips.length)];
-        bgMusic.pause(); // Para a música ao bater
+        bgMusic.pause(); 
     }
 }
 
