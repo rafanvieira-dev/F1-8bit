@@ -22,7 +22,8 @@ let paused = false;
 let supportMessage = "";
 
 // ================= ÁUDIO =================
-const bgMusic = new Audio('./music/musica.mp3'); 
+// Caminho atualizado: agora aponta para a pasta music dentro de assets
+const bgMusic = new Audio('./assets/music/musica.mp3'); 
 bgMusic.loop = true;  
 bgMusic.volume = 0.4; 
 
@@ -36,7 +37,7 @@ const tips = [
     "Quase lá! Cada erro é uma lição na F1."
 ];
 
-// NOVO: Função para forçar o áudio a iniciar na primeira interação real
+// Função para forçar o áudio a iniciar na primeira interação real
 let musicStarted = false;
 function startMusic() {
     if (!musicStarted) {
@@ -45,7 +46,7 @@ function startMusic() {
     }
 }
 
-// Escuta o primeiro toque na tela ou tecla pressionada e remove o evento a seguir (once: true)
+// Escuta o primeiro toque na tela ou tecla pressionada e remove o evento a seguir
 document.addEventListener("keydown", startMusic, { once: true });
 canvas.addEventListener("touchstart", startMusic, { once: true });
 
