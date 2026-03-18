@@ -23,7 +23,7 @@ let supportMessage = "";
 
 // ================= ÁUDIO =================
 // Caminho atualizado para a pasta 'music' que está fora da 'assets'
-const bgMusic = new Audio('./music/musica.mp3'); // Altera 'musica.mp3' para o nome exato do teu ficheiro
+const bgMusic = new Audio('./music/music.mp3'); // Altera 'music.mp3' para o nome exato do teu ficheiro
 bgMusic.loop = true;  // A música repete infinitamente
 bgMusic.volume = 0.4; // Volume de 0.0 a 1.0 (40% para não abafar os efeitos)
 
