@@ -204,3 +204,29 @@ export function drawEnemies(ctx, track) {
         }
     }
 }
+// ================= TELA DE LOADING =================
+export function drawLoadingScreen(ctx) {
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+
+    // Fundo escuro
+    ctx.fillStyle = "#111111";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 30px monospace";
+    
+    // Animação simples dos 3 pontinhos
+    let dots = ".".repeat(Math.floor(Date.now() / 400) % 4);
+    ctx.fillText("A CARREGAR" + dots, w / 2, h / 2);
+
+    ctx.fillStyle = "#aaaaaa";
+    ctx.font = "14px monospace";
+    ctx.fillText("A preparar os motores e a música...", w / 2, h / 2 + 40);
+
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+}
