@@ -14,9 +14,18 @@ export class Player {
         this.friction = 0.5;
         this.turnSpeed = 5.0;
         this.crashed = false;
+
+        // SISTEMA DE VIDAS
+        this.lives = 3;
+        this.invulnerable = 0; // Tempo de proteção após bater
     }
 
     update(input, level) {
+        // Reduz o tempo de invulnerabilidade a cada frame
+        if (this.invulnerable > 0) {
+            this.invulnerable--;
+        }
+
         this.maxSpeed = Math.min(350, 250 + level);
 
         if (input.up) {
