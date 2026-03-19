@@ -91,7 +91,7 @@ export function drawStartScreen(ctx) {
     ctx.textBaseline = "alphabetic";
 }
 
-// ================= TELA DE GAME OVER / VITÓRIA COM MENTOR E QUEBRA DE LINHA =================
+// ================= TELA DE GAME OVER / VITÓRIA =================
 export function drawGameOverScreen(ctx, score, message, isWin) {
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
@@ -104,21 +104,16 @@ export function drawGameOverScreen(ctx, score, message, isWin) {
     }
 
     ctx.textAlign = "center";
-    
-    // ----------------------------------------------------------------
-    // A MÁGICA DA QUEBRA DE LINHA ACONTECE AQUI!
-    // ----------------------------------------------------------------
     ctx.fillStyle = "#00d0ff";
     ctx.font = "italic bold 16px monospace";
     
     const text = `"${message}"`;
-    const maxWidth = w - 40; // Dá uma margem de segurança para não encostar na borda
-    const lineHeight = 22; // Espaço entre a linha de cima e a de baixo
+    const maxWidth = w - 40; 
+    const lineHeight = 22; 
     const words = text.split(' ');
     let line = '';
     let y = h / 2 + 50; 
 
-    // O código vai palavra por palavra. Se a linha ficar muito grande, ele desce para a próxima!
     for (let n = 0; n < words.length; n++) {
         let testLine = line + words[n] + ' ';
         let metrics = ctx.measureText(testLine);
@@ -132,10 +127,8 @@ export function drawGameOverScreen(ctx, score, message, isWin) {
             line = testLine;
         }
     }
-    ctx.fillText(line, w / 2, y); // Escreve o final da frase
-    // ----------------------------------------------------------------
+    ctx.fillText(line, w / 2, y); 
 
-    // A variável 'startY' pega na posição onde a frase terminou, para desenhar o "GAME OVER" mais abaixo, evitando que as letras fiquem umas por cima das outras.
     let startY = y + 40; 
 
     if (isWin) {
@@ -159,21 +152,44 @@ export function drawGameOverScreen(ctx, score, message, isWin) {
     ctx.textAlign = "left";
 }
 
+// === FUNÇÃO PARA DESENHAR AS GOTAS DE COMBUSTÍVEL (VIDAS) ===
+function drawFuelDrop(ctx, x, y) {
+    ctx.fillStyle = "#ffaa00"; // Laranja/Dourado estilo gasolina
+    ctx.beginPath();
+    ctx.arc(x, y, 6, 0, Math.PI, false);
+    ctx.lineTo(x, y - 10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
+
 // ================= HUD E CARROS =================
-export function drawHUD(ctx, score, level, speed) {
+export function drawHUD(ctx, score, level, speed, lives) {
     ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
-    ctx.fillRect(0, 0, ctx.canvas.width, 45);
+    ctx.fillRect(0, 0, ctx.canvas.width, 50); // Aumentado um bocadinho para caber as gotas
+    
     ctx.font = "bold 16px monospace";
     ctx.textBaseline = "middle";
+    
     ctx.textAlign = "left";
     ctx.fillStyle = "#ffd400";
-    ctx.fillText(`PTS: ${Math.floor(score)}`, 15, 22.5);
+    ctx.fillText(`PTS: ${Math.floor(score)}`, 15, 18);
+
+    // Desenhar as Vidas (Gotas)
+    for (let i = 0; i < lives; i++) {
+        drawFuelDrop(ctx, 22 + (i * 18), 38);
+    }
+
     ctx.textAlign = "center";
     ctx.fillStyle = "#00d0ff";
-    ctx.fillText(`LEVEL: ${level}`, ctx.canvas.width / 2, 22.5);
+    ctx.fillText(`LEVEL: ${level}`, ctx.canvas.width / 2, 25);
+    
     ctx.textAlign = "right";
     ctx.fillStyle = speed >= 210 ? "#ff4444" : "#00ff00"; 
-    ctx.fillText(`${speed} KM/H`, ctx.canvas.width - 15, 22.5);
+    ctx.fillText(`${speed} KM/H`, ctx.canvas.width - 15, 25);
+    
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 }
@@ -187,6 +203,11 @@ function drawF1(ctx, x, y, main, second, visor) {
 }
 
 export function drawCar(ctx, p) {
+    // Efeito de invulnerabilidade (piscar o carro após uma batida não-fatal)
+    if (p.invulnerable > 0 && Math.floor(p.invulnerable / 5) % 2 === 0) {
+        return; 
+    }
+
     if (spritePlayer.complete && spritePlayer.naturalWidth !== 0) {
         ctx.drawImage(spritePlayer, p.x - 30, p.y - 50, 60, 100);
     } else {
@@ -204,29 +225,21 @@ export function drawEnemies(ctx, track) {
         }
     }
 }
-// ================= TELA DE LOADING =================
+
 export function drawLoadingScreen(ctx) {
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
-
-    // Fundo escuro
     ctx.fillStyle = "#111111";
     ctx.fillRect(0, 0, w, h);
-
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 30px monospace";
-    
-    // Animação simples dos 3 pontinhos
     let dots = ".".repeat(Math.floor(Date.now() / 400) % 4);
     ctx.fillText("A CARREGAR" + dots, w / 2, h / 2);
-
     ctx.fillStyle = "#aaaaaa";
     ctx.font = "14px monospace";
     ctx.fillText("A preparar os motores e a música...", w / 2, h / 2 + 40);
-
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 }
