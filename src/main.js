@@ -14,7 +14,6 @@ canvas.height = GAME_HEIGHT;
 const track = new Track(canvas);
 const player = new Player(track);
 
-// O JOGO AGORA COMEÇA NO ESTADO DE LOADING
 let gameState = "LOADING"; 
 let score = 0;
 let level = 1;
@@ -23,17 +22,15 @@ let supportMessage = "";
 
 // ================= ÁUDIO E SISTEMA DE CARREGAMENTO =================
 let audiosCarregados = 0;
-const totalAudios = 4; // Temos 4 ficheiros de áudio para carregar
+const totalAudios = 4; 
 
 function verificarCarregamento() {
     audiosCarregados++;
-    // Se todos os 4 áudios estiverem prontos, passa para a tela de START
     if (audiosCarregados >= totalAudios && gameState === "LOADING") {
         gameState = "START";
     }
 }
 
-// Criar os áudios e forçar o pré-carregamento ("preload = 'auto'")
 const bgMusic = new Audio('./assets/music/musica.mp3'); 
 bgMusic.loop = true;  
 bgMusic.volume = 0.4; 
@@ -55,14 +52,10 @@ victoryMusic.volume = 0.6;
 victoryMusic.preload = 'auto';
 victoryMusic.addEventListener('canplaythrough', verificarCarregamento, { once: true });
 
-// Sistema de segurança: Se a internet estiver muito lenta ou falhar, 
-// força a ida para o START após 4 segundos para o jogador não ficar preso.
 setTimeout(() => {
     if (gameState === "LOADING") gameState = "START";
 }, 4000);
 
-
-// ================= DICAS / FRASES DO MENTOR =================
 const tips = [
     "O segundo colocado é apenas o primeiro dos perdedores.",
     "Dedicação total: busque o seu último limite e dê o melhor de si.",
@@ -86,7 +79,6 @@ const tips = [
     "No que diz respeito ao empenho e ao esforço, não existe meio termo."
 ];
 
-// Iniciar a música na primeira interação
 let musicStarted = false;
 function startMusic() {
     if (!musicStarted && gameState !== "LOADING") {
@@ -115,7 +107,6 @@ canvas.addEventListener("touchstart", () => {
 });
 
 function update() {
-    // Se ainda está a carregar, não faz nada
     if (gameState === "LOADING") return;
 
     if (gameState === "START") {
@@ -140,18 +131,28 @@ function update() {
         victoryMusic.play().catch(() => {}); 
     } 
     else if (player.crashed) {
-        gameState = "GAMEOVER";
-        supportMessage = tips[Math.floor(Math.random() * tips.length)];
-        bgMusic.pause(); 
+        player.crashed = false; // Reinicia a variável de batida
+        player.lives--;         // Tira uma vida
         crashSound.play().catch(() => {});
-        gameOverMusic.play().catch(() => {});
+
+        if (player.lives > 0) {
+            // SE AINDA TEM VIDAS: Limpa a pista, reduz a velocidade e dá invulnerabilidade
+            track.enemies = []; 
+            player.speed *= 0.4; 
+            player.invulnerable = 120; // Fica a piscar por ~2 segundos
+        } else {
+            // SE ACABARAM AS VIDAS: Game Over
+            gameState = "GAMEOVER";
+            supportMessage = tips[Math.floor(Math.random() * tips.length)];
+            bgMusic.pause(); 
+            gameOverMusic.play().catch(() => {});
+        }
     }
 }
 
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Se estiver no Loading, desenha só a tela de carregamento
     if (gameState === "LOADING") {
         drawLoadingScreen(ctx);
         return;
@@ -166,7 +167,9 @@ function render() {
 
     drawEnemies(ctx, track);
     drawCar(ctx, player);
-    drawHUD(ctx, score, level, Math.floor(player.speed));
+    
+    // Agora enviamos também 'player.lives' para desenhar as gotas no HUD
+    drawHUD(ctx, score, level, Math.floor(player.speed), player.lives); 
 
     if (gameState === "GAMEOVER" || gameState === "WIN") {
         drawGameOverScreen(ctx, score, supportMessage, gameState === "WIN");
